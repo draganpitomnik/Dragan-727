@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="ru"><head><meta charset="utf-8"><meta name="robots" content="noindex,nofollow,noarchive">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Прайс-лист Dragan — питомник садовых растений</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600&family=Lora:wght@600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css"></head><body>
+<noscript><p style="padding:16px">Для работы прайса включите JavaScript в браузере.</p></noscript>
+<header class="head"><div class="hi"><img class="logo" src="logo.png" alt="Dragan — садовые растения">
+<div class="mgr">Ваш менеджер<b id="mn"></b><span id="mp"></span><br><a id="mw" target="_blank" rel="noopener"></a></div></div></header>
+<main class="wrap">
+<div class="title"><h1>Прайс-лист на растения</h1><p>Цены актуальны на <span id="upd"></span><span id="note"></span></p></div>
+<div class="tools"><input id="q" class="search" type="search" placeholder="Поиск по названию" aria-label="Поиск по названию"><div class="chips" id="chips"></div></div>
+<div id="list"><div class="empty">Загрузка…</div></div>
+
+<section class="co" id="co" style="display:none"><h2>Оформление заявки</h2>
+<div class="fld"><label class="w">Имя заказчика или название компании *<input id="fn" type="text" autocomplete="name" placeholder="Иван Петров / ИП Ромашка"></label>
+<label>Город *<input id="ct" type="text" autocomplete="address-level2" placeholder="Алматы"></label>
+<label>Телефон *<input id="ph" type="tel" inputmode="tel" autocomplete="tel" placeholder="+7 7XX XXX XX XX"></label></div>
+<div class="err" id="ce" role="alert"></div>
+<div class="shm" id="sl" style="font-size:14px;line-height:1.7;margin-top:10px"></div>
+<div class="sumline"><span>Итого</span><b id="tt">0 ₸</b></div>
+<div class="acts"><a class="btn wa" id="sw" target="_blank" rel="noopener">Отправить заявку в WhatsApp</a><button type="button" class="btn ghost" id="pdf">Лист подбора (PDF / печать)</button></div>
+<p class="hint">Заявка уйдёт менеджеру, когда вы нажмёте «Отправить» в WhatsApp. Телефон и имя нужны только для связи по заказу.</p>
+<div class="cp" id="cp"><p class="hint" id="hint" style="display:none">Если WhatsApp не открылся — <a id="cpy">скопируйте текст заявки</a> и отправьте менеджеру вручную.</p><textarea id="cpt" readonly aria-label="Текст заявки"></textarea></div>
+<button type="button" class="clr" id="clr">Очистить выбор</button></section>
+
+<div class="info"><div class="box"><h2>Доставка и упаковка</h2><p>Отгрузка со склада: г. Есик, ул. Спортивная 30. Условия и стоимость доставки уточняйте у менеджера.<br><span id="pack"></span><br>Питомник не несёт ответственности за растения после передачи в транспортную компанию.</p></div>
+<div class="box"><h2>Скидки и условия</h2><p>Индивидуальные условия и скидки обсуждаются с вашим менеджером при оформлении заказа. Цены и наличие уточняйте у менеджера.</p></div></div>
+<details class="lgd"><summary>Что значат обозначения контейнеров</summary><div class="lg" id="lg"></div></details>
+<details><summary>Реквизиты</summary><div class="rq"><div class="w"><span>Бенефициар</span>ТОО «Dragan Agro Solutions»</div><div><span>БИН/ИИН</span>251240007275</div><div><span>Номер счёта (IBAN)</span>KZ31 8562 2031 5100 9793</div><div><span>Валюта · КБе</span>KZT · 17</div><div><span>Банк</span>АО «Банк ЦентрКредит»</div><div><span>БИК</span>KCJBKZKX</div><div><span>Адрес</span>Алматинская область, г. Есик, ул. Спортивная 30</div><div><span>E-mail</span>pitomnik.dragan@mail.ru</div></div></details>
+<p class="note"><button type="button" class="clr" id="prn">Сохранить прайс в PDF / печать</button><br>Instagram: @1pitomnik · www.rdragan.kz</p>
+</main>
+<div id="os"></div>
+<div class="bar" id="bar"><div><p style="margin:0"><span id="bn"></span><b id="bt"></b></p><button type="button" class="btn" id="go">Оформить</button></div></div>
+<script>window.DRAGAN={name:"Василина",phone:"77075417271"};</script>
+<script src="app.js"></script>
+</body></html>
