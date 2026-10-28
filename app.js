@@ -5,6 +5,7 @@ var CFG = {
   SHEET_CSV: "",
   PRICE_NOTE: "цены в тенге, указаны с НДС 16%", // пустая строка — подпись скрывается
   PACK: "Упаковка: коробка (6–8 шт С3 или 20–25 шт Р9) — 300 ₸; деревянный короб (100+ С3 или 400–500 Р9) — 25 000 ₸.",
+  MGR_PAGE: "z-pi1s0iv4ao.html", // страница менеджера для обработки заявки
   SECTIONS: ["Декоративные кустарники", "Декоративные деревья", "Ягодные кустарники", "Плодовые деревья"]
 };
 var LEG = {"С1":{l:1,d:12,h:12},"С1,5":{l:1.5,d:13,h:14},"С2":{l:2,d:15,h:15},"С3":{l:3,d:18,h:17},"С3,6":{l:3.6,d:19,h:18},"С5":{l:5,d:21,h:20},"С7,5":{l:7.5,d:24,h:22},"С10":{l:10,d:27,h:24},"С12":{l:12,d:29,h:26},"С20":{l:20,d:35,h:30},"Р9":{sq:[9,9,10]},"ОКС":{}};
@@ -134,11 +135,19 @@ var LEG = {"С1":{l:1,d:12,h:12},"С1,5":{l:1.5,d:13,h:14},"С2":{l:2,d:15,h:15}
     $("sl").innerHTML = r.l.map(function (z, i) { return (i + 1) + ". " + esc(z.p) + " (" + esc(z.t) + ") — " + z.q + " шт × " + f(z.c) + " = " + f(z.s) + " ₸"; }).join("<br>");
     store.set("dg_cart", Q);
   }
+  function mlink(r) {
+    if (!CFG.MGR_PAGE) return "";
+    try {
+      var o = {n: ON, d: fmtDate(""), m: MG.name, c: {fn: $("fn").value.trim(), ct: $("ct").value.trim(), ph: $("ph").value.trim()}, i: r.l.map(function (z) { return [z.p, z.t, z.q, z.c]; })};
+      var b = btoa(unescape(encodeURIComponent(JSON.stringify(o)))).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+      return "\n\nДля менеджера (обработка заявки): " + new URL(CFG.MGR_PAGE, location.href).href + "#o=" + b;
+    } catch (e) { return ""; }
+  }
   function msg() {
     var r = lines(), d = fmtDate("");
     return "Здравствуйте! Хочу оформить заказ.\nЗаявка №" + ON + " от " + d + "\nЗаказчик: " + $("fn").value.trim() + "\nГород: " + $("ct").value.trim() + "\nТелефон: " + $("ph").value.trim() + "\nМенеджер: " + MG.name + "\n" +
       r.l.map(function (z, i) { return (i + 1) + ". " + z.p + " (" + z.t + ") — " + z.q + " шт × " + f(z.c) + " = " + f(z.s) + " ₸"; }).join("\n") +
-      "\nИтого: " + f(r.tot) + " ₸" + (CFG.PRICE_NOTE ? " (" + CFG.PRICE_NOTE.replace(/^цены в тенге,\s*(указаны\s*)?/, "") + ")" : "") + "\nЦены по прайсу от " + fmtDate(updated);
+      "\nИтого: " + f(r.tot) + " ₸" + (CFG.PRICE_NOTE ? " (" + CFG.PRICE_NOTE.replace(/^цены в тенге,\s*(указаны\s*)?/, "") + ")" : "") + "\nЦены по прайсу от " + fmtDate(updated) + mlink(r);
   }
   function setErr(t) { $("ce").textContent = t; if (t) $("co").scrollIntoView({behavior: "smooth", block: "start"}); }
   function need() {
@@ -148,14 +157,6 @@ var LEG = {"С1":{l:1,d:12,h:12},"С1,5":{l:1.5,d:13,h:14},"С2":{l:2,d:15,h:15}
     setErr(""); return true;
   }
   function save() { store.set("dg_cust", {fn: $("fn").value, ct: $("ct").value, ph: $("ph").value}); }
-
-  /* ---------- лист подбора ---------- */
-  function sheet() {
-    var r = lines(), u = 0;
-    var rows = r.l.map(function (z, i) { u += z.q; return "<tr><td>" + (i + 1) + "</td><td>" + esc(z.p) + "</td><td>" + esc(z.t) + '</td><td class="c">' + z.q + '</td><td class="r">' + f(z.c) + '</td><td class="r">' + f(z.s) + '</td><td class="c">☐</td></tr>'; }).join("");
-    return "<h2>Заявка №" + ON + "</h2><div class=\"shm\">Дата: " + fmtDate("") + "<br>Заказчик: <b>" + esc($("fn").value.trim()) + "</b><br>Город: <b>" + esc($("ct").value.trim()) + "</b><br>Телефон: <b>" + esc($("ph").value.trim()) + "</b><br>Менеджер: " + esc(MG.name) + "<br>Цены по прайсу от " + fmtDate(updated) + (CFG.PRICE_NOTE ? ", " + esc(CFG.PRICE_NOTE) : "") + "</div>" +
-      '<table class="st"><thead><tr><th>№</th><th>Наименование</th><th>Тип</th><th>Кол-во</th><th>Цена, ₸</th><th>Сумма, ₸</th><th>Собрано</th></tr></thead><tbody>' + rows + '</tbody></table><div class="shm">Позиций: ' + r.l.length + " · Всего единиц: " + u + "<br>Сумма: <b>" + f(r.tot) + " ₸</b></div>";
-  }
 
   /* ---------- обозначения контейнеров ---------- */
   function ic(k) {
@@ -209,8 +210,6 @@ var LEG = {"С1":{l:1,d:12,h:12},"С1,5":{l:1.5,d:13,h:14},"С2":{l:2,d:15,h:15}
     $("cpt").value = m; $("cp").style.display = "block"; $("hint").style.display = "block";
   };
   $("cpy").onclick = function () { var t = $("cpt"); t.select(); try { document.execCommand("copy"); } catch (e) {} };
-  $("pdf").onclick = function () { if (!NN || !need()) return; $("os").innerHTML = sheet(); document.body.classList.add("po"); window.print(); };
-  window.addEventListener("afterprint", function () { document.body.classList.remove("po"); });
   $("clr").onclick = function () { if (confirm("Очистить выбранные позиции?")) { Q = {}; render(); } };
   $("prn").onclick = function () { window.print(); };
   if (window.IntersectionObserver) new IntersectionObserver(function (e) { $("bar").style.visibility = e[0].isIntersecting ? "hidden" : ""; }, {threshold: .25}).observe($("co"));

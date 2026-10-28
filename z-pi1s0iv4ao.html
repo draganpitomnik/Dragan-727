@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="ru"><head><meta charset="utf-8"><meta name="robots" content="noindex,nofollow,noarchive">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Заявка — Dragan (для менеджера)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600&family=Lora:wght@600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css"></head><body>
+<header class="head"><div class="hi"><img class="logo" src="logo.png" alt="Dragan" style="width:90px"><div class="mgr">Для менеджера<b>Обработка заявки</b><span id="on"></span></div></div></header>
+<main class="wrap" id="main">
+<div class="title"><h1>Согласование заявки</h1><p>Проверьте наличие и цены, при необходимости измените количество или скидку. Потом отправьте клиенту подтверждение и сформируйте лист подбора.</p></div>
+<section class="co" style="margin-top:14px"><div class="fld"><label class="w">Заказчик<input id="fn" type="text"></label><label>Город<input id="ct" type="text"></label><label>Телефон клиента<input id="ph" type="tel" inputmode="tel"></label>
+<label>Скидка на все позиции, %<input id="ds" type="text" inputmode="decimal" placeholder="0"></label><label class="w">Примечание (попадёт в лист подбора и в сообщение клиенту)<input id="cm" type="text" placeholder="Например: отгрузка в пятницу, оплата по счёту"></label></div></section>
+<div class="hd" style="margin-top:14px"><span>№</span><span>Позиция</span><span>Тип</span><span>Цена, ₸</span><span>Кол-во</span><span>Сумма, ₸</span></div>
+<div id="rows" style="margin-top:8px"></div>
+<section class="co"><div class="sumline"><span id="cnt"></span><b id="tt">0 ₸</b></div><div class="hint" id="sv" style="margin:0 0 10px"></div>
+<div class="acts"><a class="btn wa" id="wa" target="_blank" rel="noopener">Подтвердить клиенту в WhatsApp</a><button type="button" class="btn ghost" id="pdf">Лист подбора (PDF / печать)</button></div>
+<button type="button" class="clr" id="reset">Вернуть как в заявке клиента</button></section>
+</main>
+<div id="os"></div>
+<script src="order.js"></script>
+</body></html>

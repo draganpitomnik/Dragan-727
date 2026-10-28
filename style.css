@@ -39,6 +39,7 @@ a{color:inherit}
 .sm{grid-area:pr;justify-self:end;margin-right:0;font-size:14px;color:#4b5a6e;white-space:nowrap}
 .row .sm{display:none}
 .row.has .sm{display:block;grid-area:nm;justify-self:end;align-self:start}
+.row.has .nm{padding-right:88px}
 .qt{grid-area:qt;display:flex;align-items:center}
 .qt button{width:44px;height:44px;border:1px solid var(--line);background:#fff;font-size:22px;line-height:1;border-radius:10px;padding:0}
 .qt button:active{background:var(--champ)}
@@ -53,6 +54,7 @@ a{color:inherit}
 .row{border-radius:8px;padding:8px 12px;margin-bottom:4px}
 .row .n,.row .ty{display:block;color:#4b5a6e;font-size:14px}
 .row .nm,.row .pr,.row .qt,.row .sm,.row.has .sm{grid-area:auto}
+.row.has .nm{padding-right:0}
 .row .tp{display:none}
 .row .pr{text-align:right}
 .row .qt{justify-content:flex-end}
