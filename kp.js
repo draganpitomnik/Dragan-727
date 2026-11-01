@@ -2,6 +2,8 @@
 var KP_CFG = {
   // Та же ссылка на опубликованный лист «Каталог», что и в app.js (SHEET_CSV). Пусто — цены из catalog.json.
   SHEET_CSV: "",
+  TITLE: "Коммерческое предложение",
+  SUB: "Молодые растения в контейнерах: ягодные, плодовые, декоративные",
   VAT_NOTE: "Цены в теңге, указаны с НДС 16%.",
   ROWS_START: 5, // сколько пустых строк в новом КП
   // Условия по умолчанию — для двух способов получения. Менеджер выбирает кнопкой и может дописать что угодно.
@@ -42,7 +44,7 @@ var KP_CFG = {
   }
   function blank() {
     var r = []; for (var i = 0; i < KP_CFG.ROWS_START; i++) r.push({n: "", t: "", q: "", c: ""});
-    return {no: nextNo(), date: today(), to: "", ct: "", ph: "", mode: "ship", terms: KP_CFG.TERMS.ship, rows: r};
+    return {no: nextNo(), date: today(), to: "", ct: "", ph: "", title: KP_CFG.TITLE, sub: KP_CFG.SUB, mode: "ship", terms: KP_CFG.TERMS.ship, rows: r};
   }
   function fresh(d) {
     // черновик со вчера — получает сегодняшнюю дату и свежий номер
@@ -131,6 +133,7 @@ var KP_CFG = {
   function render() {
     $("no").value = D.no; $("dt").textContent = D.date;
     $("to").value = D.to; $("ct").value = D.ct; $("ph").value = D.ph;
+    $("ttl").innerText = D.title || KP_CFG.TITLE; $("sub").innerText = D.sub == null ? KP_CFG.SUB : D.sub;
     $("terms").innerText = D.terms;
     var mode = D.mode || "ship";
     [].forEach.call(document.querySelectorAll("[data-m]"), function (b) { b.classList.toggle("on", b.getAttribute("data-m") === mode); });
@@ -194,6 +197,10 @@ var KP_CFG = {
   ["to", "ct", "ph"].forEach(function (id) { $(id).addEventListener("input", function () { D[id] = this.value; store.set(KEY, D); }); });
   $("no").addEventListener("input", function () { D.no = this.value.trim(); store.set(KEY, D); });
   $("terms").addEventListener("input", function () { D.terms = this.innerText; store.set(KEY, D); });
+  $("ttl").addEventListener("input", function () { D.title = this.innerText.trim(); store.set(KEY, D); });
+  $("sub").addEventListener("input", function () { D.sub = this.innerText.trim(); store.set(KEY, D); });
+  // Enter в заголовке не переносит строку
+  ["ttl", "sub"].forEach(function (id) { $(id).addEventListener("keydown", function (e) { if (e.key === "Enter") { e.preventDefault(); this.blur(); } }); });
   // Отправка / Самовывоз — подставляет готовый текст условий (дальше его можно править)
   $("mode").addEventListener("click", function (e) {
     var m = e.target.getAttribute("data-m"); if (!m || m === D.mode) return;

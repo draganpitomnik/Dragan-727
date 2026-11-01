@@ -141,3 +141,10 @@ body{background:#fff;padding:0;font-size:12px}
 .terms .ed{background:#fff;border:1px dashed var(--champ2);border-radius:4px;padding:8px 10px}
 .terms .tip{font-size:12px;color:var(--mute);margin-top:6px}
 @media print{.mode,.terms .tip{display:none!important}.terms .ed{background:none;border:0;padding:0}}
+
+/* редактируемый заголовок и подзаголовок */
+.tag [contenteditable]{outline:0;border-radius:4px;border-bottom:1px dashed var(--champ2);padding:0 4px;margin-left:-4px;cursor:text}
+.tag [contenteditable]:hover{background:var(--edit)}
+.tag [contenteditable]:focus{background:#fff;box-shadow:0 0 0 1px var(--navy);border-bottom-color:transparent}
+.tag .sub:empty:before{content:"Подзаголовок (необязательно)";color:#b9b2a2}
+@media print{.tag [contenteditable]{border:0;padding:0;margin:0;background:none!important;box-shadow:none!important}.tag .sub:empty{display:none}}
