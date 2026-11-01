@@ -4,10 +4,17 @@ var KP_CFG = {
   SHEET_CSV: "",
   VAT_NOTE: "Цены в теңге, указаны с НДС 16%.",
   ROWS_START: 5, // сколько пустых строк в новом КП
-  TERMS: "Цены действительны 14 дней с даты КП.\n" +
-    "Наличие подтверждается при оформлении счёта.\n" +
-    "Отгрузка со склада питомника рядом с Алматы. Доставка до транспортной компании в Алматы, далее — по тарифу ТК за счёт покупателя.\n" +
-    "Оплата: по счёту, условия согласуйте с менеджером."
+  // Условия по умолчанию — для двух способов получения. Менеджер выбирает кнопкой и может дописать что угодно.
+  TERMS: {
+    ship: "Цены действительны 14 дней с даты КП.\n" +
+      "Наличие подтверждается при оформлении счёта.\n" +
+      "Отправка: доставим заказ до транспортной компании в Алматы, дальше — по тарифу ТК за счёт покупателя. Растения упакованы в коробки.\n" +
+      "Оплата: по счёту, условия согласуйте с менеджером.",
+    pick: "Цены действительны 14 дней с даты КП.\n" +
+      "Наличие подтверждается при оформлении счёта.\n" +
+      "Самовывоз со склада питомника рядом с Алматы. Адрес и время согласуйте с менеджером.\n" +
+      "Оплата: по счёту, условия согласуйте с менеджером."
+  }
 };
 
 (function () {
@@ -35,7 +42,7 @@ var KP_CFG = {
   }
   function blank() {
     var r = []; for (var i = 0; i < KP_CFG.ROWS_START; i++) r.push({n: "", t: "", q: "", c: ""});
-    return {no: nextNo(), date: today(), to: "", ct: "", ph: "", terms: KP_CFG.TERMS, rows: r};
+    return {no: nextNo(), date: today(), to: "", ct: "", ph: "", mode: "ship", terms: KP_CFG.TERMS.ship, rows: r};
   }
   function fresh(d) {
     // черновик со вчера — получает сегодняшнюю дату и свежий номер
@@ -125,6 +132,8 @@ var KP_CFG = {
     $("no").value = D.no; $("dt").textContent = D.date;
     $("to").value = D.to; $("ct").value = D.ct; $("ph").value = D.ph;
     $("terms").innerText = D.terms;
+    var mode = D.mode || "ship";
+    [].forEach.call(document.querySelectorAll("[data-m]"), function (b) { b.classList.toggle("on", b.getAttribute("data-m") === mode); });
     $("rows").innerHTML = D.rows.map(rowHTML).join("");
     totals();
   }
@@ -185,6 +194,13 @@ var KP_CFG = {
   ["to", "ct", "ph"].forEach(function (id) { $(id).addEventListener("input", function () { D[id] = this.value; store.set(KEY, D); }); });
   $("no").addEventListener("input", function () { D.no = this.value.trim(); store.set(KEY, D); });
   $("terms").addEventListener("input", function () { D.terms = this.innerText; store.set(KEY, D); });
+  // Отправка / Самовывоз — подставляет готовый текст условий (дальше его можно править)
+  $("mode").addEventListener("click", function (e) {
+    var m = e.target.getAttribute("data-m"); if (!m || m === D.mode) return;
+    var edited = D.terms !== KP_CFG.TERMS[D.mode || "ship"];
+    if (edited && !confirm("Заменить условия готовым текстом «" + e.target.textContent + "»? Ваши правки в условиях пропадут.")) return;
+    D.mode = m; D.terms = KP_CFG.TERMS[m]; render(); toast("Условия: " + e.target.textContent.toLowerCase());
+  });
 
   function toast(t) { var el = $("toast"); el.textContent = t; el.classList.add("on"); setTimeout(function () { el.classList.remove("on"); }, 2200); }
   function filled() { return D.rows.filter(function (r) { return num(r.q) * num(r.c) > 0; }); }

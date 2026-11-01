@@ -133,3 +133,11 @@ body{background:#fff;padding:0;font-size:12px}
 .c input{font-size:12.5px}
 .terms .ed:focus{box-shadow:none}
 }
+
+/* переключатель способа получения (не печатается) */
+.mode{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:0 0 10px;font-size:13px;color:var(--mute)}
+.mode button{border:1px solid var(--champ2);background:#fff;border-radius:6px;padding:6px 12px;font-size:14px;color:var(--navy)}
+.mode button.on{background:var(--navy);border-color:var(--navy);color:var(--cream)}
+.terms .ed{background:#fff;border:1px dashed var(--champ2);border-radius:4px;padding:8px 10px}
+.terms .tip{font-size:12px;color:var(--mute);margin-top:6px}
+@media print{.mode,.terms .tip{display:none!important}.terms .ed{background:none;border:0;padding:0}}
