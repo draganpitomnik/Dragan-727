@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="ru"><head><meta charset="utf-8"><meta name="robots" content="noindex,nofollow,noarchive">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Коммерческое предложение — Dragan</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600&family=Lora:wght@600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="kp.css"></head><body>
+<noscript><p style="padding:16px">Включите JavaScript в браузере.</p></noscript>
+<div class="mtop"><span>Бланк КП · менеджер <b id="mn"></b></span><span>Серые поля можно править. Сумма и итог считаются сами.</span></div>
+
+<article class="sheet">
+<header class="band"><img src="logo.png" alt="Dragan — садовые растения">
+<div class="who">Питомник саженцев рядом с Алматы<br>Отправка по всему Казахстану<br><b>www.rdragan.kz</b></div></header>
+
+<section class="tag"><h1>Коммерческое предложение</h1>
+<div class="sub">Молодые растения в контейнерах: ягодные, плодовые, декоративные</div>
+<div class="no"><small>КП №</small><input class="nn" id="no" aria-label="Номер КП"><span class="dd">от <span id="dt"></span></span></div></section>
+
+<section class="to">
+<label class="f w">Кому (компания или имя)<input id="to" placeholder="ИП «Сад», Айгуль Сериковна"></label>
+<label class="f">Город<input id="ct" placeholder="Астана"></label>
+<label class="f">Телефон клиента<input id="ph" inputmode="tel" placeholder="+7 7XX XXX XX XX"></label>
+</section>
+
+<section class="tbl">
+<div class="hd"><span>№</span><span>Наименование</span><span>Тара</span><span>Кол-во, шт</span><span>Цена, ₸</span><span>Сумма, ₸</span><span></span></div>
+<div id="rows"></div>
+<datalist id="dl"></datalist>
+<button type="button" class="add" id="add">+ Добавить позицию</button>
+</section>
+
+<section class="tot"><span class="cnt" id="cnt"></span><span class="sum" id="sum"></span>
+<span class="wd" id="wd"></span><span class="vat" id="vat"></span></section>
+
+<section class="terms"><div class="stamp"><b>Живые растения</b>питомник Dragan</div>
+<h2>Условия</h2><div class="ed" id="terms" contenteditable="true" spellcheck="true"></div></section>
+
+<footer class="foot">
+<div><b>Реквизиты</b><br>ТОО «Dragan Agro Solutions» · БИН 251240007275<br>IBAN KZ31 8562 2031 5100 9793 · АО «Банк ЦентрКредит» · БИК KCJBKZKX · КБе 17<br>pitomnik.dragan@mail.ru · Instagram @1pitomnik</div>
+<div class="sign"><b>Составил(а): <span id="mn2"></span></b><br><span id="mp2"></span><br>Подпись ____________________</div>
+</footer>
+</article>
+
+<div class="hist" id="hist" style="display:none"><details><summary>Мои последние КП (на этом устройстве)</summary><table><tbody id="htb"></tbody></table></details></div>
+
+<div class="bar"><div><span class="t">Итого<b id="bsum">0 ₸</b><span id="mp" style="display:none"></span></span>
+<button type="button" class="btn gh" id="new">Новое КП</button>
+<button type="button" class="btn gh" id="copy">Текст для WhatsApp</button>
+<button type="button" class="btn" id="pdf">PDF / печать</button></div></div>
+<div class="toast" id="toast"></div>
+<script>window.DRAGAN={name:"Василина",phone:"77075417271",letter:"V"};</script>
+<script src="kp.js"></script>
+</body></html>
