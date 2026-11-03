@@ -48,6 +48,7 @@
     items = o.i.map(function (a) { return { p: String(a[0]), t: String(a[1] || ''), q: Math.max(0, parseInt(a[2], 10) || 0), c: Math.max(0, Math.round(+a[3]) || 0), size: '' }; })
       .filter(function (x) { return x.q > 0; });
     $('order-box').classList.remove('hidden'); $('order-paste').classList.add('hidden');
+    $('pos-sub').textContent = 'Позиции подставлены из заявки. Если клиент что-то добавил — допишите из прайса ниже.';
     $('order-box').innerHTML = '<b>Заявка №' + esc(o.n) + '</b>' + (o.d ? ' от ' + esc(o.d) : '') + (o.m ? ' · менеджер ' + esc(o.m) : '') +
       '<br>Заказчик: ' + esc(o.c.fn || '—') + ' · ' + esc(o.c.ct || '—') + ' · ' + esc(o.c.ph || '—') + '<br>Позиций: ' + items.length;
     if (o.c.ph && !v('b-phone')) $('b-phone').value = o.c.ph;
@@ -56,13 +57,43 @@
   }
   function renderItems() {
     var s = TPL.sellers[seller];
-    if (!items.length) { $('items').innerHTML = '<tr><td colspan="7" style="color:var(--muted)">Загрузите заявку</td></tr>'; $('totals').innerHTML = ''; return; }
+    $('vat-note').textContent = s.vat ? 'с НДС 16%' : '— для ИП НДС не выделяется';
+    if (!items.length) { $('items').innerHTML = '<tr><td colspan="8" style="color:var(--muted)">Позиций пока нет — добавьте в шаге 1</td></tr>'; $('totals').innerHTML = ''; return; }
     $('items').innerHTML = items.map(function (x, i) {
-      return '<tr><td>' + (i + 1) + '</td><td>' + esc(x.p) + '</td><td class="hm">' + esc(x.t) + '</td><td><input data-i="' + i + '" class="sz" value="' + esc(x.size) + '" placeholder="40–60 см" style="width:110px"></td><td class="r">' + x.q + '</td><td class="r">' + B.money(x.c) + '</td><td class="r">' + B.money(x.q * x.c) + '</td></tr>';
+      return '<tr><td>' + (i + 1) + '</td><td>' + esc(x.p) + '</td><td class="hm">' + esc(x.t) + '</td><td><input data-i="' + i + '" data-f="size" value="' + esc(x.size) + '" placeholder="40–60 см" style="width:100px"></td>' +
+        '<td class="r"><input data-i="' + i + '" data-f="q" type="number" min="1" value="' + x.q + '" style="width:70px;text-align:right"></td>' +
+        '<td class="r"><input data-i="' + i + '" data-f="c" type="number" min="0" value="' + x.c + '" style="width:90px;text-align:right"></td>' +
+        '<td class="r" data-sum="' + i + '">' + B.money(x.q * x.c) + '</td><td><button class="del" type="button" data-del="' + i + '" title="Удалить строку" aria-label="Удалить">×</button></td></tr>';
     }).join('');
+    totalsOnly();
+  }
+  function totalsOnly() {
+    var s = TPL.sellers[seller];
+    items.forEach(function (x, i) { var c = document.querySelector('[data-sum="' + i + '"]'); if (c) c.textContent = B.money(x.q * x.c); });
     var t = B.totals(items, s);
     $('totals').innerHTML = 'Итого: ' + B.money(t.sum) + ' ₸ ' + (s.vat ? '<span>в т.ч. НДС ' + t.rate + '%: ' + B.money(t.vat, 2) + ' ₸</span>' : '<span>без НДС</span>');
-    $('vat-note').textContent = s.vat ? 'с НДС 16%' : '— для ИП НДС не выделяется';
+  }
+
+  // ---------- прайс для ручного добавления (тот же catalog.json, что у прайсов) ----------
+  var catalog = [];
+  function tp(t) { return String(t || '').trim().replace(/^С/, 'C').replace(/^Р/, 'P'); }
+  function catLabel(x) { return x.p + ' · ' + tp(x.t) + ' · ' + B.money(x.c) + ' ₸'; }
+  function loadCatalog() {
+    fetch('../catalog.json', { cache: 'no-cache' }).then(function (r) { return r.json(); }).then(function (d) {
+      catalog = (d.items || []).filter(function (x) { return x.p && x.c > 0; });
+      $('catalog-list').innerHTML = catalog.map(function (x) { return '<option value="' + esc(catLabel(x)) + '">'; }).join('');
+    }).catch(function () { $('pos-sub').textContent = 'Прайс не загрузился — позиции можно вписать вручную (название, тара, цена).'; });
+  }
+  function pickCatalog() {
+    var val = v('add-name'), hit = catalog.filter(function (x) { return catLabel(x) === val; })[0];
+    if (hit) { $('add-name').value = hit.p; $('add-t').value = tp(hit.t); $('add-c').value = hit.c; $('add-q').focus(); }
+  }
+  function addItem() {
+    var p = v('add-name'), c = Math.round(+v('add-c')), q = parseInt(v('add-q'), 10);
+    if (!p || !(c > 0) || !(q > 0)) { msg('msg-new', 'Для новой позиции нужны название, цена и количество.', 'err'); return; }
+    items.push({ p: p, t: v('add-t'), q: q, c: c, size: '' });
+    $('add-name').value = ''; $('add-t').value = ''; $('add-c').value = ''; $('add-q').value = 1; $('add-name').focus();
+    renderItems();
   }
 
   // ---------- форма ----------
@@ -141,7 +172,8 @@
     var f = $('b-form').value;
     if (f === 'person') errs.push('Физлицу без ИП этот договор не подходит (это розничная продажа). Оформите обычный счёт/накладную.');
     if (f === 'gov') errs.push('Для госзакупок подписывается типовой договор заказчика, не этот.');
-    if (!items.length) errs.push('Нет позиций: загрузите заявку.');
+    if (!items.length) errs.push('Нет позиций: загрузите заявку или добавьте из прайса.');
+    if (items.some(function (x) { return !(x.q > 0) || !(x.c > 0); })) errs.push('В спецификации есть строка с нулевым количеством или ценой.');
     if (f === 'other') { if (!v('b-name-ru')) bad('b-name-ru', 'Наименование на русском'); if (!v('b-name-kz')) bad('b-name-kz', 'Наименование на казахском'); }
     else if (!v('b-name')) bad('b-name', 'Название покупателя');
     if (!/^\d{12}$/.test(v('b-bin'))) bad('b-bin', 'БИН/ИИН — 12 цифр');
@@ -175,7 +207,7 @@
   function shortName(data) { return (data.buyer.nameRu || 'покупатель').slice(0, 40); }
 
   function draft() {
-    if (!items.length) { msg('msg-new', 'Сначала загрузите заявку.', 'err'); return; }
+    if (!items.length) { msg('msg-new', 'Сначала добавьте позиции (шаг 1).', 'err'); return; }
     var d = collect(true); d.date = ru(todayISO());
     download(B.buildContract(TPL, d), 'ПРОЕКТ_Договор_' + shortName(d)).then(function () { msg('msg-new', 'Проект скачан. Красные [ ] в файле — незаполненные поля.', 'ok'); });
   }
@@ -186,7 +218,7 @@
     var d = collect(false);
     if (!confirm('Зарегистрировать договор ' + (seller === 'too' ? 'ТОО' : 'ИП') + ' с «' + d.buyer.nameRu + '» на ' + B.money(d.total) + ' ₸?\nНомер присваивается навсегда, изменить договор после этого нельзя.')) return;
     $('btn-register').disabled = true; msg('msg-new', 'Регистрируем…', 'info');
-    client.rpc('dg_register_contract', { p_seller: seller, p_template_version: TPL.version, p_order_no: order ? String(order.n || '') : null,
+    client.rpc('dg_register_contract', { p_seller: seller, p_template_version: TPL.version, p_order_no: v('order-id') || (order ? String(order.n || '') : null),
       p_buyer_name: d.buyer.nameRu, p_total: d.total, p_payload: d })
       .then(function (r) {
         if (r.error) throw r.error;
@@ -347,12 +379,20 @@
     if (f === 'person' || f === 'gov') msg('msg-new', f === 'person' ? 'Физлицу без ИП договор поставки не оформляем.' : 'Для госзакупок — типовой договор заказчика.', 'err');
     toggles();
   });
-  $('items').addEventListener('input', function (e) { if (e.target.classList.contains('sz')) items[+e.target.getAttribute('data-i')].size = e.target.value; });
+  $('items').addEventListener('input', function (e) {
+    var f = e.target.getAttribute('data-f'); if (!f) return;
+    var x = items[+e.target.getAttribute('data-i')];
+    if (f === 'size') x.size = e.target.value; else { x[f] = Math.max(0, Math.round(+e.target.value) || 0); totalsOnly(); }
+  });
+  $('items').addEventListener('click', function (e) { var d = e.target.closest('[data-del]'); if (d) { items.splice(+d.getAttribute('data-del'), 1); renderItems(); } });
+  $('add-name').addEventListener('input', pickCatalog); $('add-name').addEventListener('change', pickCatalog);
+  $('add-btn').onclick = addItem;
+  $('add-q').addEventListener('keydown', function (e) { if (e.key === 'Enter') addItem(); });
   $('order-load').onclick = function () { if (!loadOrder(decodeOrder(v('order-link')))) msg('msg-new', 'Ссылка не похожа на заявку (нет части #o=…).', 'err'); };
   $('btn-draft').onclick = draft; $('btn-register').onclick = register;
   $('tab-new').onclick = function () { $('view-new').classList.remove('hidden'); $('view-reg').classList.add('hidden'); $('tab-new').setAttribute('aria-pressed', 'true'); $('tab-reg').setAttribute('aria-pressed', 'false'); };
   $('tab-reg').onclick = function () { $('view-reg').classList.remove('hidden'); $('view-new').classList.add('hidden'); $('tab-reg').setAttribute('aria-pressed', 'true'); $('tab-new').setAttribute('aria-pressed', 'false'); if (client) loadRegistry(); };
   $('reg-list').addEventListener('click', regClick);
   $('c-from').value = todayISO();
-  toggles(); setSeller('too'); loadOrder(decodeOrder(location.hash)); start();
+  toggles(); setSeller('too'); loadOrder(decodeOrder(location.hash)); loadCatalog(); start();
 })();
