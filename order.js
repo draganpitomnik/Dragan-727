@@ -109,5 +109,30 @@
     var b = btoa(unescape(encodeURIComponent(s))).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
     window.open("team/contracts.html#o=" + b, "_blank", "noopener");
   };
+  // Общая таблица заказов (Google Sheets): строки для вставки. ID заказа = номер заявки, по клику открывает эту заявку.
+  function enc() {
+    var it = L.filter(function (x) { return x.q > 0; }).map(function (x) { return [x.p, x.t, x.q, x.c]; });
+    var b = btoa(unescape(encodeURIComponent(JSON.stringify({n: D.n, d: D.d, m: D.m, c: D.c, i: it})))).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+    return location.href.split("#")[0] + "#o=" + b;
+  }
+  function clip(t, okMsg) {
+    var done = function () { alert(okMsg); };
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(t).then(done, function () { fallback(); });
+    else fallback();
+    function fallback() { var ta = document.createElement("textarea"); ta.value = t; document.body.appendChild(ta); ta.select(); try { document.execCommand("copy"); done(); } catch (e) { alert("Не удалось скопировать — браузер не разрешил."); } ta.remove(); }
+  }
+  function clean(v) { return String(v == null ? "" : v).replace(/[\t\r\n]+/g, " ").trim(); }
+  function today() { var d = new Date(); return ("0" + d.getDate()).slice(-2) + "." + ("0" + (d.getMonth() + 1)).slice(-2) + "." + d.getFullYear(); }
+  if ($("rg1")) $("rg1").onclick = function () {
+    if (!totals().n) { alert("Нет позиций к сборке."); return; }
+    var m = D.m === "Наталья" || D.m === "Василина" ? D.m : "";
+    var row = ['=HYPERLINK("' + enc() + '";"' + clean(D.n) + '")', today(), m, "Заявка с прайса", clean(D.c.fn), clean(D.c.ph), clean(D.c.ct), "", "", "", Math.round(totals().t)];
+    clip(row.join("\t"), "Строка заказа скопирована. Вставьте её на лист «Заказы» в столбец A первой пустой строки.");
+  };
+  if ($("rg2")) $("rg2").onclick = function () {
+    var rows = L.filter(function (x) { return x.q > 0; }).map(function (x) { return [clean(D.n), clean(x.p), clean(x.t), "", x.q, x.c].join("\t"); });
+    if (!rows.length) { alert("Нет позиций к сборке."); return; }
+    clip(rows.join("\n"), "Позиции скопированы (" + rows.length + "). Вставьте их на лист «Позиции» в столбец A первой пустой строки.");
+  };
   render();
 })();
