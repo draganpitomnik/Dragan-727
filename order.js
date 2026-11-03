@@ -101,5 +101,13 @@
     if (!totals().n || p.length < 11) { e.preventDefault(); alert(p.length < 11 ? "Проверьте номер телефона клиента." : "Нет позиций."); return; }
     this.href = "https://wa.me/" + p + "?text=" + encodeURIComponent(clientText());
   };
+  // Договор по заявке: передаём текущие (согласованные) позиции в модуль договоров. Данные остаются в ссылке после #.
+  if ($("ctr")) $("ctr").onclick = function () {
+    var it = L.filter(function (x) { return x.q > 0; }).map(function (x) { return [x.p, x.t, x.q, x.c]; });
+    if (!it.length) { alert("Нет позиций к сборке."); return; }
+    var s = JSON.stringify({n: D.n, d: D.d, m: D.m, c: D.c, i: it});
+    var b = btoa(unescape(encodeURIComponent(s))).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+    window.open("team/contracts.html#o=" + b, "_blank", "noopener");
+  };
   render();
 })();

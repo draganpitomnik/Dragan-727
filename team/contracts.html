@@ -1,0 +1,99 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="robots" content="noindex,nofollow"><meta http-equiv="Cache-Control" content="no-store"><title>DRAGAN Manager — Договоры</title><style>
+:root{--navy:#14283F;--cream:#F5F0E7;--gold:#E4CC9E;--line:#dedad2;--muted:#61758a;--red:#b42318}*{box-sizing:border-box}body{margin:0;background:var(--cream);color:var(--navy);font:15px/1.5 system-ui,-apple-system,'Segoe UI',sans-serif}
+main{max-width:980px;margin:auto;padding:18px 15px 70px}.hero{background:var(--navy);color:#fff;border-radius:22px;padding:22px 24px}.eyebrow{color:var(--gold);font-size:11px;letter-spacing:2px;font-weight:750}.hero h1{font:600 clamp(26px,5vw,36px)/1.2 Georgia,serif;margin:8px 0 4px}.hero p{color:#d7e0e7;margin:0}.hero a{color:var(--gold)}
+.tabs{display:flex;gap:8px;margin:18px 0 6px}.tabs button{flex:1;min-height:46px;border-radius:12px;border:1px solid var(--line);background:#fff;color:var(--navy);font:700 15px system-ui;cursor:pointer}.tabs button[aria-pressed=true]{background:var(--navy);color:#fff;border-color:var(--navy)}
+.card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:18px;margin-top:14px}.card h2{font-size:17px;margin:0 0 4px}.card .sub{font-size:13px;color:var(--muted);margin:0 0 12px}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px 14px}.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px 14px}.full{grid-column:1/-1}
+label{display:block;font-size:13px;font-weight:650}label small{font-weight:400;color:var(--muted)}input,select,textarea{display:block;width:100%;margin-top:4px;min-height:42px;border:1px solid #cfc8b8;border-radius:9px;padding:8px 10px;font:15px system-ui;color:var(--navy);background:#fff}textarea{min-height:70px;resize:vertical}input:focus,select:focus,textarea:focus{outline:3px solid #e4cc9e;border-color:#ae8650}
+.bad{border-color:var(--red)!important;background:#fff6f5}.seg{display:flex;gap:8px;flex-wrap:wrap}.seg button{flex:1 1 200px;min-height:56px;border-radius:12px;border:2px solid var(--line);background:#fff;color:var(--navy);font:650 14px system-ui;cursor:pointer;text-align:left;padding:8px 12px}.seg button[aria-pressed=true]{border-color:var(--navy);background:#eef2f6;box-shadow:0 0 0 3px #e4cc9e}
+table.items{width:100%;border-collapse:collapse;font-size:14px}table.items th{background:var(--cream);text-align:left;font-size:12px;padding:7px}table.items td{border-top:1px solid var(--line);padding:6px 7px;vertical-align:middle}table.items td.r,table.items th.r{text-align:right;white-space:nowrap}table.items input{min-height:34px;margin:0;font-size:14px;padding:4px 7px}
+.tot{display:flex;justify-content:flex-end;gap:18px;flex-wrap:wrap;margin-top:10px;font-weight:700}.tot span{font-weight:400;color:var(--muted)}
+.order{background:#f9f6ef;border:1px dashed #cdbb94;border-radius:12px;padding:12px;font-size:14px}.order b{font-size:15px}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}.btn{border:0;border-radius:11px;padding:12px 16px;background:var(--navy);color:#fff;font:700 15px system-ui;cursor:pointer}.btn.alt{background:#e8e3d7;color:var(--navy)}.btn.gold{background:var(--gold);color:var(--navy)}.btn.small{padding:8px 11px;font-size:13px}.btn:disabled{opacity:.5;cursor:not-allowed}
+.msg{margin-top:12px;font-size:14px;border-radius:10px;padding:10px 12px;display:none}.msg.err{display:block;background:#fdecea;color:var(--red)}.msg.ok{display:block;background:#e9f5ec;color:#1d6b35}.msg.info{display:block;background:#eef2f6;color:var(--navy)}
+.lock{font-size:13px;color:var(--muted);background:#f4f1ea;border-radius:10px;padding:10px 12px;margin-top:12px}
+.reg{border-top:1px solid var(--line);padding:12px 0;display:grid;grid-template-columns:1fr auto;gap:8px}.reg:first-child{border-top:0}.reg .num{font-weight:750}.reg .meta{font-size:13px;color:var(--muted)}.reg .docs{font-size:13px;margin-top:4px}.st{font-size:11px;border-radius:20px;padding:2px 8px;margin-left:6px;background:#e9f5ec;color:#1d6b35}.st.cancelled,.st.annulled{background:#fdecea;color:var(--red)}.reg .acts{display:flex;gap:6px;flex-wrap:wrap;align-items:start;justify-content:flex-end}
+.sub-form{background:#f9f6ef;border-radius:12px;padding:14px;margin-top:10px}
+.hidden{display:none!important}body.auth-loading main>*:not(.hero),body.auth-locked main>*:not(.hero):not(#gate){display:none!important}#gate{display:none}body.auth-locked #gate{display:block}
+@media(max-width:640px){.grid,.grid3{grid-template-columns:1fr}main{padding:10px 9px 50px}.card{padding:14px}.reg{grid-template-columns:1fr}.reg .acts{justify-content:flex-start}table.items .hm{display:none}}
+</style></head><body class="auth-loading"><main>
+<header class="hero"><div class="eyebrow">DRAGAN · WORKSPACE</div><h1>Договоры поставки</h1><p><span id="who">Проверяем доступ…</span> · <a href="index.html">← в кабинет</a></p></header>
+<section id="gate" class="card"><h2>Нужен вход</h2><p>Откройте <a href="index.html">кабинет</a>, войдите рабочей почтой и вернитесь сюда — ссылка на заявку сохранится, если откроете её снова.</p></section>
+
+<div class="tabs" role="tablist"><button type="button" id="tab-new" aria-pressed="true">Новый договор</button><button type="button" id="tab-reg" aria-pressed="false">Реестр</button></div>
+
+<section id="view-new">
+ <div class="card"><h2>1. Заявка</h2><p class="sub">Позиции, количество и цены берутся из заявки. Изменить их можно только на странице заявки — потом снова нажать «Договор по заявке».</p>
+  <div id="order-box" class="order hidden"></div>
+  <div id="order-paste"><label>Ссылка на заявку <small>(если открыли страницу не из заявки)</small><input id="order-link" type="url" placeholder="https://draganpitomnik.github.io/Dragan-727/z-…html#o=…"></label><div class="actions"><button class="btn alt small" type="button" id="order-load">Загрузить заявку</button></div></div>
+ </div>
+
+ <div class="card"><h2>2. Продавец</h2><div class="seg"><button type="button" data-seller="too" aria-pressed="true"><b>ТОО «Dragan Agro Solutions»</b><br><small>с НДС 16%</small></button><button type="button" data-seller="ip" aria-pressed="false"><b>ИП «ДРАГАН Р.А.»</b><br><small>без НДС</small></button></div>
+ <p class="lock">Реквизиты продавца и текст договора (ред. <span id="tpl-ver"></span>) заблокированы. Их меняет только владелец.</p></div>
+
+ <div class="card"><h2>3. Покупатель</h2><p class="sub">Договор только для организаций, ИП и крестьянских хозяйств. Физлицу без ИП и госзаказчику по тендеру этот договор не подходит.</p>
+  <div class="grid">
+   <label>Форма<select id="b-form"><option value="too">ТОО</option><option value="ao">АО</option><option value="ip">ИП</option><option value="kh">Крестьянское хозяйство</option><option value="other">Другая (вписать вручную)</option><option value="person">Физическое лицо без ИП</option><option value="gov">Госзаказчик (госзакупки)</option></select></label>
+   <label>Название без формы <small>(Агро Сад · для ИП — ФИО)</small><input id="b-name"></label>
+   <label class="full other-form hidden">Полное наименование на русском<input id="b-name-ru"></label>
+   <label class="full other-form hidden">Толық атауы қазақша<input id="b-name-kz"></label>
+   <label>БИН / ИИН <small>(12 цифр)</small><input id="b-bin" inputmode="numeric" maxlength="12"></label>
+   <label>Юридический адрес<input id="b-address"></label>
+   <label>Банк<input id="b-bank" placeholder="АО «Kaspi Bank»"></label>
+   <label>ИИК <small>(KZ… 20 знаков)</small><input id="b-iik" maxlength="20"></label>
+   <label>БИК<input id="b-bik" maxlength="11"></label>
+   <label>КБе<input id="b-kbe" maxlength="2" inputmode="numeric" placeholder="17"></label>
+   <label>E-mail для уведомлений<input id="b-email" type="email"></label>
+   <label>WhatsApp / телефон<input id="b-phone" type="tel"></label>
+  </div>
+  <h2 style="margin-top:16px">Подписант</h2>
+  <div class="grid">
+   <label>Должность<select id="b-pos"><option value="director">Директор</option><option value="gendirector">Генеральный директор</option><option value="chairman">Председатель правления</option><option value="head">Глава хозяйства</option><option value="ip">Индивидуальный предприниматель</option><option value="proxy">Представитель по доверенности</option></select></label>
+   <label>Основание<select id="b-basis"><option value="charter">Устав</option><option value="talon">Талон о приёме уведомления (ИП)</option><option value="kh">Документ о регистрации КХ</option><option value="proxy">Доверенность</option></select></label>
+   <label>ФИО полностью <small>(Иванов Иван Иванович)</small><input id="b-fio"></label>
+   <label>ФИО в родительном падеже <small>(Иванова Ивана Ивановича)</small><input id="b-fio-gen"></label>
+   <label class="full" id="basis-doc-l">№ и дата документа-основания<input id="b-basis-doc" placeholder="№ 12 от 01.10.2026"></label>
+  </div>
+ </div>
+
+ <div class="card"><h2>4. Спецификация №1</h2><p class="sub">Можно вписать только размер. Цены — из заявки (цены прайса <span id="vat-note">с НДС 16%</span>).</p>
+  <div style="overflow-x:auto"><table class="items"><thead><tr><th>№</th><th>Наименование и сорт</th><th class="hm">Тара</th><th>Размер</th><th class="r">Кол-во</th><th class="r">Цена</th><th class="r">Сумма</th></tr></thead><tbody id="items"><tr><td colspan="7" style="color:var(--muted)">Загрузите заявку</td></tr></tbody></table></div>
+  <div class="tot" id="totals"></div>
+ </div>
+
+ <div class="card"><h2>5. Условия поставки и оплаты</h2><p class="sub">Это меняет менеджер. Остальное — утверждённый текст договора.</p>
+  <div class="grid3">
+   <label>Предоплата, %<input id="c-pct" type="number" min="0" max="100" value="50"></label>
+   <label>Срок предоплаты, банк. дней<input id="c-days" type="number" min="1" max="30" value="3"></label>
+   <label>Срок выборки, календ. дней <small>(самовывоз)</small><input id="c-pick" type="number" min="1" max="30" value="3"></label>
+   <label>Передача с<input id="c-from" type="date"></label>
+   <label>Передача по <small>(если период)</small><input id="c-to" type="date"></label>
+   <label>Способ получения<select id="c-method"><option value="pickup">Самовывоз со склада</option><option value="carrier">Через перевозчика (ТК)</option><option value="supplier">Транспортом питомника до адреса</option></select></label>
+   <label class="carrier-f">Перевозчик и терминал<input id="c-carrier" placeholder="ТК «…», терминал г. Алматы"></label>
+   <label class="dest-f">Город, адрес / получатель, телефон<input id="c-dest"></label>
+   <label>Упаковка<select id="c-pack"><option value="boxes">Коробки</option><option value="containers">Контейнеры</option><option value="mixed">Коробки и контейнеры</option><option value="none">Без упаковки (навалом)</option></select></label>
+   <label>Стоимость доставки<select id="c-dcost"><option value="na">Не применяется</option><option value="included">Входит в цену</option><option value="separate">Отдельно, сумма</option><option value="buyer">За счёт покупателя</option></select></label>
+   <label class="dsum-f">Сумма доставки, теңге<input id="c-dsum" type="number" min="0"></label>
+  </div>
+  <div class="grid" style="margin-top:10px">
+   <label>Особые условия — по-русски <small>(если нет — пусто)</small><textarea id="c-sp-ru"></textarea></label>
+   <label>Ерекше талаптар — қазақша <small>(обязательно, если есть русский текст)</small><textarea id="c-sp-kz"></textarea></label>
+  </div>
+ </div>
+
+ <div class="card"><h2>6. Документ</h2>
+  <p class="sub">«Проект» — без номера, для согласования с клиентом. «Зарегистрировать» — сервер присвоит номер навсегда, договор попадёт в реестр.</p>
+  <div class="actions"><button class="btn alt" type="button" id="btn-draft">Скачать проект DOCX</button><button class="btn" type="button" id="btn-register">Зарегистрировать и скачать</button></div>
+  <div class="msg" id="msg-new"></div>
+ </div>
+</section>
+
+<section id="view-reg" class="hidden"><div class="card"><h2>Реестр договоров</h2><p class="sub" id="reg-sub">Менеджер видит свои договоры, администратор — все.</p><div id="reg-list">Загрузка…</div><div class="msg" id="msg-reg"></div></div></section>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.10/dist/umd/supabase.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/docx@9.8.1/dist/index.iife.js"></script>
+<script src="contracts/template.js"></script>
+<script src="contracts/settings.js"></script>
+<script src="contracts/docx-build.js"></script>
+<script src="contracts/app.js"></script>
+</body></html>
