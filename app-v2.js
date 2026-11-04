@@ -3,7 +3,8 @@ var CFG = {
   // Ссылка на опубликованный лист «Каталог» (Google Таблица → Файл → Поделиться → Опубликовать в интернете → CSV).
   // Пока пусто — прайс берётся из файла catalog.json.
   SHEET_CSV: "",
-  PRICE_NOTE: "цены в теңге, указаны с НДС 16%", // пустая строка — подпись скрывается
+  PRICE_NOTE: "",   // розница: только итоговая цена, слово «НДС» не пишем (решение Романа 04.11.2026)
+  PRICE_NOTE_OPT: "цены без НДС; для плательщиков НДС +16% (счёт-фактура от ТОО)",   // опт и юрлица
   PACK: "Упаковка: коробка (6–8 шт С3 или 20–25 шт Р9) — 300 ₸; деревянный короб (100+ С3 или 400–500 Р9) — 25 000 ₸.",
   MGR_PAGE: "z-pi1s0iv4ao-v2.html", // страница менеджера для обработки заявки (v2: скидки по позициям)
   MAIL: "pitomnik.dragan@mail.ru",   // куда уходит заявка «на e-mail», если у менеджера не указан свой адрес (window.DRAGAN.email)
@@ -13,7 +14,8 @@ var LEG = {"С1":{l:1,d:12,h:12},"С1,5":{l:1.5,d:13,h:14},"С2":{l:2,d:15,h:15}
 
 (function () {
   var MG = window.DRAGAN || {name: "Менеджер", phone: ""};
-  var KIND = MG.kind === "opt" ? "opt" : "retail";   // опт: цены из поля o («Цена опт, ₸»); позиции без оптовой цены не показываются
+  var KIND = MG.kind === "opt" ? "opt" : "retail";
+  var NOTE = KIND === "opt" ? CFG.PRICE_NOTE_OPT : CFG.PRICE_NOTE;   // опт: цены из поля o («Цена опт, ₸»); позиции без оптовой цены не показываются
   var $ = function (i) { return document.getElementById(i); };
   var f = function (n) { return Math.round(n).toLocaleString("ru-RU"); };
   var esc = function (s) { return String(s).replace(/[&<>"]/g, function (c) { return {"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;"}[c]; }); };
@@ -149,7 +151,7 @@ var LEG = {"С1":{l:1,d:12,h:12},"С1,5":{l:1.5,d:13,h:14},"С2":{l:2,d:15,h:15}
     var r = lines(), d = fmtDate("");
     return "Здравствуйте! Хочу оформить заказ" + (KIND === "opt" ? " по оптовому прайсу" : "") + ".\nЗаявка №" + ON + " от " + d + "\nЗаказчик: " + $("fn").value.trim() + "\nГород: " + $("ct").value.trim() + "\nТелефон: " + $("ph").value.trim() + "\nМенеджер: " + MG.name + "\n" +
       r.l.map(function (z, i) { return (i + 1) + ". " + z.p + " (" + z.t + ") — " + z.q + " шт × " + f(z.c) + " = " + f(z.s) + " ₸"; }).join("\n") +
-      "\nИтого: " + f(r.tot) + " ₸" + (CFG.PRICE_NOTE ? " (" + CFG.PRICE_NOTE.replace(/^цены в теңге,\s*(указаны\s*)?/, "") + ")" : "") + "\nЦены по прайсу от " + fmtDate(updated) + mlink(r);
+      "\nИтого: " + f(r.tot) + " ₸" + (NOTE ? " (" + NOTE + ")" : "") + "\nЦены по прайсу от " + fmtDate(updated) + mlink(r);
   }
   function setErr(t) { $("ce").textContent = t; if (t) $("co").scrollIntoView({behavior: "smooth", block: "start"}); }
   function need() {
@@ -186,7 +188,7 @@ var LEG = {"С1":{l:1,d:12,h:12},"С1,5":{l:1.5,d:13,h:14},"С2":{l:2,d:15,h:15}
   $("mw").href = wa + "?text=" + encodeURIComponent("Здравствуйте! Я ознакомился с прайсом, хочу уточнить несколько вопросов");
   $("mw").textContent = "Написать в WhatsApp";
   $("mp").textContent = phone(MG.phone);
-  $("note").textContent = CFG.PRICE_NOTE ? ", " + CFG.PRICE_NOTE : "";
+  $("note").textContent = NOTE ? ", " + NOTE : "";
   $("pack").textContent = CFG.PACK;
   var cu = store.get("dg_cust"); if (cu) { $("fn").value = cu.fn || ""; $("ct").value = cu.ct || ""; $("ph").value = cu.ph || ""; }
 

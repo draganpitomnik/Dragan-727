@@ -2,7 +2,9 @@
    Dragan — страница менеджера: обработка заявки клиента и лист подбора.
    Данные заявки приходят в ссылке после знака # (на сервер не отправляются). */
 (function () {
-  var VAT = "с НДС 16%";
+  var VAT = "";   // розница: НДС не упоминаем; опт — ниже (VAT_OPT)
+  var VAT_OPT = "цены без НДС; для плательщиков НДС +16% (счёт-фактура от ТОО)";
+  var CLIENT_PAGE = "zakaz.html";   // страница «Ваш заказ» для клиента: состав, скидки, итог, PDF
   var $ = function (i) { return document.getElementById(i); };
   var f = function (n) { return Math.round(n).toLocaleString("ru-RU"); };
   var esc = function (s) { return String(s).replace(/[&<>"]/g, function (c) { return {"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;"}[c]; }); };
@@ -52,21 +54,30 @@
   function missing() { return L.filter(function (x) { return x.q < x.q0; }); }
   function note() { return $("cm").value.trim(); }
 
+  function vatNote() { return isOpt() ? VAT_OPT : VAT; }
+  // v2: ссылка на страницу «Ваш заказ» — состав, скидки, итог (телефон клиента в ссылку не кладём)
+  function clientLink() {
+    var o = {n: D.n, d: fmtDate(), m: D.m || "", k: D.k || "retail", c: {fn: D.c.fn || "", ct: D.c.ct || ""}, cm: note(),
+      i: L.filter(function (x) { return x.q > 0; }).map(function (x) { return [x.p, x.t, x.q, x.b, x.c, x.q0]; }),
+      x: missing().filter(function (x) { return x.q === 0; }).map(function (x) { return x.p + " (" + x.t + ")"; })};
+    var b = btoa(unescape(encodeURIComponent(JSON.stringify(o)))).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+    return new URL(CLIENT_PAGE, location.href).href + "#o=" + b;
+  }
+  // v2 (решение Романа 04.11.2026): клиенту — коротко: согласован, сумма, скидка, итог + ссылка на состав заказа
   function clientText() {
     var r = totals(), mi = missing().filter(function (x) { return x.q === 0; }), ch = L.filter(function (x) { return x.q > 0 && x.q < x.q0; });
     var t = "Здравствуйте" + (D.c.fn ? ", " + D.c.fn : "") + "! Ваш заказ №" + D.n + " согласован.\n" +
-      L.filter(function (x) { return x.q > 0; }).map(function (x, i) { return (i + 1) + ". " + x.p + " (" + x.t + ") — " + x.q + " шт × " + f(x.c) + (x.c < x.b ? " (" + pct(x) + ")" : "") + " = " + f(x.q * x.c) + " ₸"; }).join("\n") +
-      (r.t0 > r.t ? "\nСкидка: −" + f(r.t0 - r.t) + " ₸" : "") + "\nИтого к оплате: " + f(r.t) + " ₸ (" + VAT + ")";
-    if (mi.length) t += "\nНет в наличии: " + mi.map(function (x) { return x.p + " (" + x.t + ")"; }).join(", ");
-    if (ch.length) t += "\nУменьшено количество: " + ch.map(function (x) { return x.p + " (" + x.t + "): " + x.q + " из " + x.q0; }).join(", ");
+      (r.t0 > r.t ? "Сумма по прайсу: " + f(r.t0) + " ₸\nСкидка: −" + f(r.t0 - r.t) + " ₸\n" : "") +
+      "Итого к оплате: " + f(r.t) + " ₸" + (vatNote() ? " (" + vatNote() + ")" : "");
+    if (mi.length || ch.length) t += "\nЕсть изменения по наличию — они отмечены в составе заказа.";
     if (note()) t += "\n" + note();
-    return t;
+    return t + "\nСостав заказа: " + clientLink();
   }
   function sheet() {
     var r = totals(), u = 0, rows = "", k = 0;
     L.forEach(function (x) { if (x.q > 0) { k++; u += x.q; rows += "<tr><td>" + k + "</td><td>" + esc(x.p) + "</td><td>" + esc(x.t) + '</td><td class="c">' + x.q + '</td><td class="r">' + f(x.c) + '</td><td class="r">' + f(x.q * x.c) + '</td><td class="c">☐</td></tr>'; } });
     var mi = missing().filter(function (x) { return x.q === 0; });
-    return "<h2>Лист подбора · заявка №" + esc(D.n) + "</h2><div class=\"shm\">Согласовано: " + fmtDate() + (D.m ? " · менеджер " + esc(D.m) : "") + "<br>Заказчик: <b>" + esc(D.c.fn) + "</b><br>Город: <b>" + esc(D.c.ct) + "</b><br>Телефон: <b>" + esc(D.c.ph) + "</b><br>Цены согласованы, " + VAT + "</div>" +
+    return "<h2>Лист подбора · заявка №" + esc(D.n) + "</h2><div class=\"shm\">Согласовано: " + fmtDate() + (D.m ? " · менеджер " + esc(D.m) : "") + "<br>Заказчик: <b>" + esc(D.c.fn) + "</b><br>Город: <b>" + esc(D.c.ct) + "</b><br>Телефон: <b>" + esc(D.c.ph) + "</b><br>Цены согласованы" + (vatNote() ? ", " + vatNote() : "") + "</div>" +
       '<table class="st"><thead><tr><th>№</th><th>Наименование</th><th>Тип</th><th>Кол-во</th><th>Цена, ₸</th><th>Сумма, ₸</th><th>Собрано</th></tr></thead><tbody>' + rows + "</tbody></table>" +
       '<div class="shm">Позиций: ' + k + " · Всего единиц: " + u + (r.t0 > r.t ? "<br>Сумма по прайсу: " + f(r.t0) + " ₸<br>Скидка: −" + f(r.t0 - r.t) + " ₸" : "") + "<br>К оплате: <b>" + f(r.t) + " ₸</b>" +
       (mi.length ? "<br>Нет в наличии (не собирать): " + esc(mi.map(function (x) { return x.p + " (" + x.t + ")"; }).join(", ")) : "") + (note() ? "<br>Примечание: " + esc(note()) : "") + "</div>";
@@ -105,11 +116,18 @@
   $("reset").onclick = function () { disc = 0; $("ds").value = ""; L.forEach(function (x) { x.q = x.q0; x.c = x.b; x.d = null; x.man = false; }); render(); };
   $("pdf").onclick = function () { if (!totals().n) { alert("Нет позиций к сборке."); return; } $("os").innerHTML = sheet(); document.body.classList.add("po"); window.print(); };
   window.addEventListener("afterprint", function () { document.body.classList.remove("po"); });
+  // v2: подтверждение клиенту — всегда текстом. Большой заказ WhatsApp может не принять по ссылке — тогда копируем текст и вставляем в чат вручную.
+  if ($("cpc")) $("cpc").onclick = function () {
+    if (!totals().n) { alert("Нет позиций."); return; }
+    if (!okOpt()) { alert("Это оптовый прайс. Дополнительная скидка на опт — только с согласия Романа. Согласуйте и отметьте галочку «Согласовано с Романом»."); return; }
+    clip(clientText(), "Текст подтверждения скопирован. Вставьте его в чат с клиентом (WhatsApp, Telegram, e-mail).");
+  };
   $("wa").onclick = function (e) {
     var p = waPhone(D.c.ph);
     if (!totals().n || p.length < 11) { e.preventDefault(); alert(p.length < 11 ? "Проверьте номер телефона клиента." : "Нет позиций."); return; }
     if (!okOpt()) { e.preventDefault(); alert("Это оптовый прайс. Дополнительная скидка на опт — только с согласия Романа. Согласуйте и отметьте галочку «Согласовано с Романом»."); return; }
-    this.href = "https://wa.me/" + p + "?text=" + encodeURIComponent(clientText());
+    var t = clientText();
+    this.href = "https://wa.me/" + p + "?text=" + encodeURIComponent(t);
   };
   // Договор по заявке: передаём текущие (согласованные) позиции в модуль договоров. Данные остаются в ссылке после #.
   if ($("ctr")) $("ctr").onclick = function () {

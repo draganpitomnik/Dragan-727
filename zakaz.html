@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="ru"><head><meta charset="utf-8"><meta name="robots" content="noindex,nofollow,noarchive">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Ваш заказ — Dragan, садовые растения</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600&family=Lora:wght@600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<style>
+/* Страница «Ваш заказ» для клиента (v1, 04.11.2026): состав согласованного заказа, скидки, итог, PDF */
+.ord{background:#fff;border:1px solid #e3dccd;border-radius:14px;padding:4px 0;margin-top:14px;overflow:hidden}
+.ol{display:grid;grid-template-columns:28px 1fr auto;gap:2px 12px;padding:12px 16px;border-bottom:1px solid #efe9dc;align-items:start}
+.ol:last-child{border-bottom:0}.ol .k{color:#8a8f98;font-size:14px;padding-top:2px}
+.ol .p{font-weight:500;line-height:1.35}.ol .p small{display:block;font-weight:400;color:#6b7280;font-size:13.5px;margin-top:3px}
+.ol .s{text-align:right;font-weight:600;white-space:nowrap;font-variant-numeric:tabular-nums}
+.ol .s small{display:block;font-weight:400;color:#6b7280;font-size:12.5px}
+.chg{color:#a8322a}.tot{background:#fff;border:1px solid #e3dccd;border-radius:14px;padding:14px 16px;margin-top:12px;font-size:16px;line-height:1.9}
+.tot div{display:flex;justify-content:space-between;gap:12px}.tot .big{font-size:21px;font-weight:600;border-top:1px solid #efe9dc;margin-top:6px;padding-top:8px}
+.tot .dsc{color:#1f7a4d}.vat{font-size:13.5px;color:#6b7280;margin-top:6px}
+.miss{background:#fbeeea;border:1px solid #efc9bf;border-radius:12px;padding:10px 14px;margin-top:12px;font-size:14.5px;line-height:1.5}
+.cmn{background:#fbfaf6;border:1px solid #e3dccd;border-radius:12px;padding:10px 14px;margin-top:12px;font-size:14.5px}
+.acts2{display:grid;gap:10px;margin-top:16px}@media(min-width:620px){.acts2{grid-template-columns:1fr 1fr}}
+@media print{.acts2,.noprint{display:none!important}.ord,.tot{border-color:#999}.ol{padding:6px 4px}}
+</style></head><body>
+<header class="head"><div class="hi"><img class="logo" src="logo.png" alt="Dragan — садовые растения">
+<div class="mgr">Ваш менеджер<b id="mn"></b><span id="mp"></span></div></div></header>
+<main class="wrap" id="main">
+<div class="title"><h1 id="h">Ваш заказ</h1><p id="sub"></p></div>
+<div class="ord" id="ord"></div>
+<div class="tot" id="tot"></div>
+<div id="miss"></div><div id="cmn"></div>
+<div class="acts2"><a class="btn wa" id="wa" target="_blank" rel="noopener">Написать менеджеру в WhatsApp</a><button type="button" class="btn ghost" id="pdf">Сохранить в PDF / распечатать</button></div>
+<p class="hint noprint" style="display:block;margin-top:14px">Это согласованный состав вашего заказа. Если что-то не так — напишите менеджеру, исправим до отгрузки.<br>Отгрузка со склада: г. Есик, ул. Спортивная 30 · Instagram: @1pitomnik · www.rdragan.kz</p>
+</main>
+<script>
+(function () {
+  var MGRS = {"Наталья": "77754780934", "Василина": "77075417271"};   // телефоны менеджеров (как в прайсах)
+  var OPT_NOTE = "Цены без НДС. Для плательщиков НДС — +16% (счёт-фактура от ТОО).";
+  var $ = function (i) { return document.getElementById(i); };
+  var f = function (n) { return Math.round(n).toLocaleString("ru-RU"); };
+  var esc = function (s) { return String(s).replace(/[&<>"]/g, function (c) { return {"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;"}[c]; }); };
+  var D = null, m = location.hash.match(/[#&]o=([^&]+)/);
+  if (m) try { var b = m[1].replace(/-/g, "+").replace(/_/g, "/"); while (b.length % 4) b += "="; D = JSON.parse(decodeURIComponent(escape(atob(b)))); } catch (e) { D = null; }
+  if (!D || !D.i || !D.i.length) { $("main").innerHTML = '<div class="empty" style="padding:40px 0">Заказ не найден: ссылка повреждена или обрезана. Попросите менеджера прислать её ещё раз.</div>'; return; }
+  var ph = MGRS[D.m] || "";
+  $("mn").textContent = D.m || "питомник Dragan";
+  $("mp").textContent = ph ? "+7 " + ph.slice(1, 4) + " " + ph.slice(4, 7) + "-" + ph.slice(7, 9) + "-" + ph.slice(9) : "";
+  $("h").textContent = "Ваш заказ №" + D.n;
+  $("sub").textContent = "Согласован " + (D.d || "") + (D.c && D.c.fn ? " · " + D.c.fn : "") + (D.c && D.c.ct ? ", " + D.c.ct : "");
+  document.title = "Заказ №" + D.n + " — Dragan";
+  var t = 0, t0 = 0, u = 0;
+  $("ord").innerHTML = D.i.map(function (a, i) {
+    var p = a[0], tp = a[1], q = +a[2], base = +a[3], c = +a[4], q0 = a[5] != null ? +a[5] : q;
+    t += q * c; t0 += q * base; u += q;
+    var pc = base && c < base ? Math.round((1 - c / base) * 1000) / 10 : 0;
+    return '<div class="ol"><span class="k">' + (i + 1) + '</span><span class="p">' + esc(p) + '<small>' + esc(tp) + ' · ' + q + ' шт × ' + f(c) + ' ₸' +
+      (pc ? ' · скидка ' + String(pc).replace(".", ",") + '% (было ' + f(base) + ' ₸)' : '') + (q < q0 ? ' · <span class="chg">в наличии ' + q + ' из ' + q0 + '</span>' : '') + '</small></span>' +
+      '<span class="s">' + f(q * c) + ' ₸</span></div>';
+  }).join("");
+  $("tot").innerHTML = '<div><span>Позиций: ' + D.i.length + ' · единиц: ' + u + '</span></div>' +
+    (t0 > t ? '<div><span>Сумма по прайсу</span><span>' + f(t0) + ' ₸</span></div><div class="dsc"><span>Скидка</span><span>−' + f(t0 - t) + ' ₸</span></div>' : '') +
+    '<div class="big"><span>Итого к оплате</span><span>' + f(t) + ' ₸</span></div>' + (D.k === "opt" ? '<div class="vat">' + OPT_NOTE + '</div>' : '');
+  if (D.x && D.x.length) $("miss").innerHTML = '<div class="miss"><b>Нет в наличии:</b> ' + esc(D.x.join(", ")) + '</div>';
+  if (D.cm) $("cmn").innerHTML = '<div class="cmn">' + esc(D.cm) + '</div>';
+  var wa = ph ? "https://wa.me/" + ph + "?text=" + encodeURIComponent("Здравствуйте! По заказу №" + D.n + ": ") : "";
+  if (wa) $("wa").href = wa; else $("wa").style.display = "none";
+  $("pdf").onclick = function () { window.print(); };
+})();
+</script>
+</body></html>
