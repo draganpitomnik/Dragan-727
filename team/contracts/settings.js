@@ -3,8 +3,8 @@
    Пока поле пустое, в договоре стоит красное [ ]. */
 window.DG_SETTINGS = {
   sellerContacts: {
-    email: '',   // например: 'pitomnik.dragan@gmail.com'
-    phone: ''    // например: '+7 7xx xxx xx xx (WhatsApp)'
+    email: 'pitomnik.dragan@mail.ru',
+    phone: '+7 707 541-72-71'  // + телефон Натальи — добавить, когда владелец пришлёт
   },
   ipTalon: ''    // для договоров ИП: '№ KZ..., от ДД.ММ.ГГГГ' — талон о приёме уведомления о начале деятельности ИП
 };
