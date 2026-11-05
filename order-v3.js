@@ -10,8 +10,8 @@
   var f = function (n) { return Math.round(n).toLocaleString("ru-RU"); };
   var esc = function (s) { return String(s).replace(/[&<>"]/g, function (c) { return {"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;"}[c]; }); };
   var D, L = [], disc = 0;
-  // v3: авто-запись в реестр заказов. Адрес — «Production URL» узла «Заявка согласована (webhook)» в n8n.
-  var REG_URL = "https://pitomnik.app.n8n.cloud/webhook/dragan-reestr-zakazov-v1-k7q2m";
+  // v3: авто-запись в реестр заказов. Адрес — веб-приложение скрипта в таблице реестра (Расширения → Apps Script).
+  var REG_URL = "https://script.google.com/macros/s/AKfycbxiP6bOXoLjVZFYdr_wRCY-vkJvBFswPRD_FatJC5kMEGV7mtb15lQlRvojVzkHs0lu/exec";   // скрипт таблицы реестра (Apps Script), 05.11.2026
   var REG_KEY = "dragan-reestr-v1";
   var regSent = "";
 
