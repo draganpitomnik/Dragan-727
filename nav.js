@@ -110,7 +110,7 @@
   if (!isHome) {
     var items = [
       ['home', '⌂ Кабинет'], ['price', 'Прайс'], ['kp', 'КП'], ['contracts', 'Договоры'], ['orders', 'Заявки'],
-      ['delivery', 'Адрес и доставка'], ['requisites', 'Реквизиты'], ['messages', 'Шаблоны'], ['knowledge', 'База знаний']
+      ['delivery', 'Адрес и доставка'], ['requisites', 'Реквизиты'], ['messages', 'Шаблоны'], ['knowledge', 'База знаний'], ['gifts', 'Советы клиенту']
     ];
     var chips = document.createElement('div');
     chips.className = 'dgnav-chips';
