@@ -10,6 +10,7 @@ body{margin:0;background:var(--cream);color:var(--navy);font:15px/1.5 system-ui,
 .o.new{border-left-color:#2f6b3c}.o.agreed{border-left-color:#c69e63}.o.prepaid,.o.paid{border-left-color:#14283F}.o.shipped{border-left-color:#8C9BAE;opacity:.8}.o.refused,.o.cancelled{opacity:.5;border-left-color:#ccc}
 .top{display:flex;gap:8px;margin-top:14px}.top a{flex:1;min-height:48px;display:flex;align-items:center;justify-content:center;border-radius:14px;background:#c69e63;color:var(--navy);font:700 15px system-ui;text-decoration:none}
 .o select{font-weight:700}
+.wn{font:700 14px system-ui;border-radius:9px;padding:6px 10px;margin:-2px 0 8px}.wn.red{background:#a8322a;color:#fff}.wn.red2{color:#a8322a;padding:0;margin:0 0 4px}.wn.yel{background:#f6e7b8}
 .o .t{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;font-weight:700;font-size:16px}.o .t span:last-child{white-space:nowrap}
 .o .m{color:var(--muted);font-size:13.5px;margin:3px 0 8px}.tag{display:inline-block;font-size:11px;font-weight:750;letter-spacing:1px;border-radius:6px;padding:1px 7px;margin-right:6px;background:#f1ead9}
 .tag.opt{background:var(--navy);color:var(--gold)}.acts{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
@@ -42,7 +43,7 @@ body{margin:0;background:var(--cream);color:var(--navy);font:15px/1.5 system-ui,
   let filt = 'act';
   async function load() {
     list.innerHTML = '<div class="empty">Загрузка…</div>';
-    let q = client.from('price_orders').select('token,order_no,created_at,manager,kind,customer_name,city,phone,n_items,qty_total,total,status,source,agreed_total,agreed_at').order('created_at', {ascending: false}).limit(300);
+    let q = client.from('price_orders').select('token,order_no,created_at,manager,kind,customer_name,city,phone,n_items,qty_total,total,status,source,agreed_total,agreed_at,status_at').order('created_at', {ascending: false}).limit(300);
     if (FL[filt]) q = q.in('status', FL[filt]); else if (filt) q = q.eq('status', filt);
     if ($('who').value) q = q.eq('manager', $('who').value);
     const {data, error} = await q;
@@ -50,8 +51,13 @@ body{margin:0;background:var(--cream);color:var(--navy);font:15px/1.5 system-ui,
     if (!data.length) { list.innerHTML = '<div class="empty">Здесь пока пусто.</div>'; return; }
     list.innerHTML = data.map(o => {
       const d = new Date(o.created_at).toLocaleString('ru-RU', {day: '2-digit', month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Almaty'});
+      const age = Date.now() - new Date(o.created_at), payAge = Date.now() - new Date(o.status_at || o.agreed_at || o.created_at);
+      const ago = ms => { const h = Math.floor(ms / 36e5); return h < 1 ? Math.max(1, Math.floor(ms / 6e4)) + ' мин' : h < 48 ? h + ' ч' : Math.floor(h / 24) + ' дн'; };
+      const warn = o.status === 'new' && age > 2 * 36e5 ? '<div class="wn red">⏰ Заявка висит ' + ago(age) + ' — разберите её первой</div>'
+        : o.status === 'new' ? '<div class="wn red2">● Новая · ' + ago(age) + '</div>'
+        : o.status === 'agreed' && payAge > 3 * 864e5 ? '<div class="wn yel">⏳ Ждёт оплаты ' + ago(payAge) + ' — напомните клиенту или поставьте «Отказ клиента»</div>' : '';
       const sum = o.agreed_total != null ? f(o.agreed_total) + ' ₸ <small style="font-weight:500;color:#2f6b3c">согласовано</small>' : f(o.total) + ' ₸ <small style="font-weight:500;color:var(--muted)">по заявке</small>';
-      return '<div class="o ' + o.status + '"><div class="t"><span>№' + esc(o.order_no) + ' · ' + esc(o.customer_name) + (o.city ? ', ' + esc(o.city) : '') + '</span><span>' + sum + '</span></div>' +
+      return '<div class="o ' + o.status + '">' + warn + '<div class="t"><span>№' + esc(o.order_no) + ' · ' + esc(o.customer_name) + (o.city ? ', ' + esc(o.city) : '') + '</span><span>' + sum + '</span></div>' +
         '<div class="m"><span class="tag' + (o.kind === 'opt' ? ' opt' : '') + '">' + (o.kind === 'opt' ? 'ОПТ' : 'РОЗНИЦА') + '</span><span class="tag">' + (o.source === 'manual' ? 'ВРУЧНУЮ' : 'С ПРАЙСА') + '</span><b>' + esc(o.manager) + '</b> · ' + d + ' · позиций ' + o.n_items + ', штук ' + f(o.qty_total) + (o.phone ? ' · ' + esc(o.phone) : '') + '</div>' +
         '<div class="acts"><a class="main" href="' + BASE + 'z-pi1s0iv4ao-v2.html#t=' + o.token + '" target="_blank" rel="noopener">' + (o.agreed_at ? 'Открыть заказ / лист подбора' : 'Согласовать / лист подбора') + '</a>' +
         '<a href="' + BASE + (o.agreed_at ? 'zakaz.html' : 'zayavka.html') + '#t=' + o.token + '" target="_blank" rel="noopener">Как видит клиент / PDF</a>' +
