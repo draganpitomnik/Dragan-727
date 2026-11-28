@@ -3,13 +3,30 @@
    Данные заявки приходят в ссылке после знака # (на сервер не отправляются). */
 (function () {
   var VAT = "";   // розница: НДС не упоминаем; опт — ниже (VAT_OPT)
-  var VAT_OPT = "цены без НДС; для плательщиков НДС +16% (счёт-фактура от ТОО)";
+  var VAT_OPT = "цены указаны с НДС 16%; плательщикам НДС — счёт-фактура, НДС в зачёт";   // решение Романа 27.11.2026: опт — цены с НДС
   var CLIENT_PAGE = "zakaz.html";   // страница «Ваш заказ» для клиента: состав, скидки, итог, PDF
   var $ = function (i) { return document.getElementById(i); };
   var f = function (n) { return Math.round(n).toLocaleString("ru-RU"); };
   var esc = function (s) { return String(s).replace(/[&<>"]/g, function (c) { return {"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;"}[c]; }); };
   var D, L = [], disc = 0;
 
+  // v2.1 (28.11.2026): заявка из базы по короткой ссылке #t=… — загружаем, кладём в ссылку #o=… и открываем как обычно
+  (function () {
+    var t = location.hash.match(/[#&]t=([a-f0-9]{32})/);
+    if (!t || /[#&]o=/.test(location.hash)) return;
+    document.addEventListener("DOMContentLoaded", function () { var mm = document.querySelector("main"); if (mm) mm.innerHTML = '<div class="empty" style="padding:40px 0">Загружаю заявку…</div>'; });
+    fetch("https://abudsqoclurrtrtqlkvz.supabase.co/rest/v1/rpc/dg_order_get", {method: "POST",
+      headers: {"apikey": "sb_publishable_KD9NLO5_HEtI_g6-Bv6anA_YyFDAbXA", "Content-Type": "application/json"}, body: JSON.stringify({t: t[1]})})
+      .then(function (r) { if (!r.ok) throw r.status; return r.json(); })
+      .then(function (d) {
+        if (!d || !d.i) throw 0;
+        var o = {n: d.n, d: d.d, m: d.m, k: d.k, c: d.c, i: d.i};
+        var b = btoa(unescape(encodeURIComponent(JSON.stringify(o)))).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+        history.replaceState(null, "", location.pathname + "#o=" + b + "&t=" + t[1]); location.reload();
+      })
+      .catch(function () { var mm = document.querySelector("main"); if (mm) mm.innerHTML = '<div class="empty" style="padding:40px 0">Не удалось загрузить заявку из базы. Проверьте интернет и обновите страницу.</div>'; });
+    throw new Error("dg: загрузка заявки из базы");   // дальше скрипт запустится заново после перезагрузки
+  })();
   function decode() {
     var m = location.hash.match(/[#&]o=([^&]+)/);
     if (!m) return null;

@@ -34,7 +34,7 @@
 <script>
 (function () {
   var MGRS = {"Наталья": "77754780934", "Василина": "77075417271"};   // телефоны менеджеров (как в прайсах)
-  var OPT_NOTE = "Цены без НДС. Для плательщиков НДС — +16% (счёт-фактура от ТОО).";
+  var OPT_NOTE = "Цены указаны с НДС 16%. Плательщикам НДС — счёт-фактура, НДС в зачёт.";   // решение Романа 27.11.2026
   var $ = function (i) { return document.getElementById(i); };
   var f = function (n) { return Math.round(n).toLocaleString("ru-RU"); };
   var esc = function (s) { return String(s).replace(/[&<>"]/g, function (c) { return {"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;"}[c]; }); };
