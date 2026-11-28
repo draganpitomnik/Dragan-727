@@ -1,5 +1,5 @@
-<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="robots" content="noindex,nofollow"><meta http-equiv="Cache-Control" content="no-store"><title>DRAGAN Manager — Заявки с прайса</title><style>
-/* DRAGAN Manager · Заявки с прайса v1 (28.11.2026): все заявки клиентов из базы, статус, открыть / обработать */
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="robots" content="noindex,nofollow"><meta http-equiv="Cache-Control" content="no-store"><title>DRAGAN Manager — Заявки и заказы</title><style>
+/* DRAGAN Manager · Заказы v2 (28.11.2026): все заявки и заказы из базы, 7 статусов, новый заказ вручную. v1 — заявки с прайса */
 :root{--navy:#14283F;--cream:#F5F0E7;--gold:#E4CC9E;--line:#dedad2;--muted:#6b7280}*{box-sizing:border-box}
 body{margin:0;background:var(--cream);color:var(--navy);font:15px/1.5 system-ui,-apple-system,'Segoe UI',sans-serif}main{max-width:940px;margin:auto;padding:18px 15px 60px}
 .hero{background:var(--navy);color:#fff;border-radius:22px;padding:22px 24px}.eyebrow{color:var(--gold);font-size:11px;letter-spacing:2px;font-weight:750}
@@ -7,15 +7,18 @@ body{margin:0;background:var(--cream);color:var(--navy);font:15px/1.5 system-ui,
 .bar{display:flex;flex-wrap:wrap;gap:8px;margin:16px 0 4px}.bar button,.bar select{min-height:42px;border-radius:12px;border:1px solid var(--line);background:#fff;color:var(--navy);font:600 14px system-ui;padding:0 14px;cursor:pointer}
 .bar button[aria-pressed=true]{background:var(--navy);color:#fff;border-color:var(--navy)}
 .o{background:#fff;border:1px solid var(--line);border-left:5px solid #c69e63;border-radius:16px;padding:14px 16px;margin-top:12px}
-.o.new{border-left-color:#2f6b3c}.o.cancelled{opacity:.55}.o.agreed{border-left-color:#8C9BAE}
+.o.new{border-left-color:#2f6b3c}.o.agreed{border-left-color:#c69e63}.o.prepaid,.o.paid{border-left-color:#14283F}.o.shipped{border-left-color:#8C9BAE;opacity:.8}.o.refused,.o.cancelled{opacity:.5;border-left-color:#ccc}
+.top{display:flex;gap:8px;margin-top:14px}.top a{flex:1;min-height:48px;display:flex;align-items:center;justify-content:center;border-radius:14px;background:#c69e63;color:var(--navy);font:700 15px system-ui;text-decoration:none}
+.o select{font-weight:700}
 .o .t{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;font-weight:700;font-size:16px}.o .t span:last-child{white-space:nowrap}
 .o .m{color:var(--muted);font-size:13.5px;margin:3px 0 8px}.tag{display:inline-block;font-size:11px;font-weight:750;letter-spacing:1px;border-radius:6px;padding:1px 7px;margin-right:6px;background:#f1ead9}
 .tag.opt{background:var(--navy);color:var(--gold)}.acts{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
 .acts a,.acts select{min-height:40px;display:inline-flex;align-items:center;border-radius:10px;border:1px solid var(--line);padding:0 12px;color:var(--navy);text-decoration:none;font:600 14px system-ui;background:#fff}
 .acts a.main{background:var(--navy);color:#fff;border-color:var(--navy)}.empty{padding:30px 4px;color:var(--muted)}.err{color:#a8322a}
 </style><script src="../nav.js" defer></script></head><body><main>
-<section class="hero"><div class="eyebrow">DRAGAN MANAGER</div><h1>Заявки с прайса</h1><p>Всё, что клиенты отправили с прайсов. Заявка ≠ оплата: наличие и цену согласуйте, потом подтверждайте клиенту. <a href="index.html">← в кабинет</a></p></section>
-<div class="bar" id="bar"><button data-f="new" aria-pressed="true">Новые</button><button data-f="in_work" aria-pressed="false">В работе</button><button data-f="" aria-pressed="false">Все</button><select id="who" aria-label="Менеджер"><option value="">Все менеджеры</option><option>Наталья</option><option>Василина</option></select><button id="rl" aria-pressed="false">↻ Обновить</button></div>
+<section class="hero"><div class="eyebrow">DRAGAN MANAGER</div><h1>Заявки и заказы</h1><p>Всё в одном месте: заявки с прайсов и заказы, внесённые вручную. Склад занимает только оплаченное (с «Предоплата получена»). <a href="index.html">← в кабинет</a></p></section>
+<div class="top"><a href="order-new.html">+ Новый заказ (звонок, WhatsApp, площадка)</a></div>
+<div class="bar" id="bar"><button data-f="act" aria-pressed="true">В работе</button><button data-f="new" aria-pressed="false">Новые</button><button data-f="agreed" aria-pressed="false">Ждут оплаты</button><button data-f="pay" aria-pressed="false">Оплачены</button><button data-f="shipped" aria-pressed="false">Отправлены</button><button data-f="" aria-pressed="false">Все</button><select id="who" aria-label="Менеджер"><option value="">Все менеджеры</option><option>Наталья</option><option>Василина</option></select><button id="rl" aria-pressed="false">↻ Обновить</button></div>
 <div id="list"><div class="empty">Загрузка…</div></div>
 </main>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.10/dist/umd/supabase.js"></script>
@@ -24,7 +27,8 @@ body{margin:0;background:var(--cream);color:var(--navy);font:15px/1.5 system-ui,
 (async function () {
   const URL = 'https://abudsqoclurrtrtqlkvz.supabase.co', KEY = 'sb_publishable_KD9NLO5_HEtI_g6-Bv6anA_YyFDAbXA';
   const BASE = new window.URL('../', location.href).href;
-  const ST = {new: 'Новая', in_work: 'В работе', agreed: 'Согласована', cancelled: 'Отменена'};
+  const ST = {new: 'Новая', agreed: 'Согласована, ждёт оплаты', prepaid: 'Предоплата получена', paid: 'Оплачено полностью', shipped: 'Отправлено / выдано', refused: 'Отказ клиента', cancelled: 'Отменена нами'};
+  const FL = {act: ['new', 'agreed', 'prepaid', 'paid'], pay: ['prepaid', 'paid']};
   const ME = {'natalia.pitomnik@gmail.com': 'Наталья', 'vasilina.pitomnik@gmail.com': 'Василина'};
   const $ = i => document.getElementById(i), list = $('list');
   const f = n => Math.round(+n || 0).toLocaleString('ru-RU');
@@ -35,23 +39,22 @@ body{margin:0;background:var(--cream);color:var(--navy);font:15px/1.5 system-ui,
   const client = window.supabase.createClient(URL, KEY, {auth: {persistSession: true, autoRefreshToken: true}});
   const {data: {user}} = await client.auth.getUser();
   if (!user) return stop('Сначала войдите в кабинет: <a href="index.html">открыть кабинет</a>.');
-  const mine = ME[(user.email || '').toLowerCase()] || '';
-  if (mine) $('who').value = mine;
-  let filt = 'new';
+  let filt = 'act';
   async function load() {
     list.innerHTML = '<div class="empty">Загрузка…</div>';
-    let q = client.from('price_orders').select('token,order_no,created_at,manager,kind,customer_name,city,phone,n_items,qty_total,total,status').order('created_at', {ascending: false}).limit(300);
-    if (filt) q = q.eq('status', filt);
+    let q = client.from('price_orders').select('token,order_no,created_at,manager,kind,customer_name,city,phone,n_items,qty_total,total,status,source,agreed_total,agreed_at').order('created_at', {ascending: false}).limit(300);
+    if (FL[filt]) q = q.in('status', FL[filt]); else if (filt) q = q.eq('status', filt);
     if ($('who').value) q = q.eq('manager', $('who').value);
     const {data, error} = await q;
     if (error) return stop('Не удалось загрузить заявки: ' + esc(error.message) + '. Если доступ запрещён — войдите в кабинет заново.');
     if (!data.length) { list.innerHTML = '<div class="empty">Здесь пока пусто.</div>'; return; }
     list.innerHTML = data.map(o => {
       const d = new Date(o.created_at).toLocaleString('ru-RU', {day: '2-digit', month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Almaty'});
-      return '<div class="o ' + o.status + '"><div class="t"><span>№' + esc(o.order_no) + ' · ' + esc(o.customer_name) + (o.city ? ', ' + esc(o.city) : '') + '</span><span>' + f(o.total) + ' ₸</span></div>' +
-        '<div class="m"><span class="tag' + (o.kind === 'opt' ? ' opt' : '') + '">' + (o.kind === 'opt' ? 'ОПТ' : 'РОЗНИЦА') + '</span>' + d + ' · ' + esc(o.manager) + ' · позиций ' + o.n_items + ', штук ' + f(o.qty_total) + ' · ' + esc(o.phone) + '</div>' +
-        '<div class="acts"><a class="main" href="' + BASE + 'z-pi1s0iv4ao-v2.html#t=' + o.token + '" target="_blank" rel="noopener">Обработать / лист подбора</a>' +
-        '<a href="' + BASE + 'zayavka.html#t=' + o.token + '" target="_blank" rel="noopener">Как видит клиент / PDF</a>' +
+      const sum = o.agreed_total != null ? f(o.agreed_total) + ' ₸ <small style="font-weight:500;color:#2f6b3c">согласовано</small>' : f(o.total) + ' ₸ <small style="font-weight:500;color:var(--muted)">по заявке</small>';
+      return '<div class="o ' + o.status + '"><div class="t"><span>№' + esc(o.order_no) + ' · ' + esc(o.customer_name) + (o.city ? ', ' + esc(o.city) : '') + '</span><span>' + sum + '</span></div>' +
+        '<div class="m"><span class="tag' + (o.kind === 'opt' ? ' opt' : '') + '">' + (o.kind === 'opt' ? 'ОПТ' : 'РОЗНИЦА') + '</span><span class="tag">' + (o.source === 'manual' ? 'ВРУЧНУЮ' : 'С ПРАЙСА') + '</span><b>' + esc(o.manager) + '</b> · ' + d + ' · позиций ' + o.n_items + ', штук ' + f(o.qty_total) + (o.phone ? ' · ' + esc(o.phone) : '') + '</div>' +
+        '<div class="acts"><a class="main" href="' + BASE + 'z-pi1s0iv4ao-v2.html#t=' + o.token + '" target="_blank" rel="noopener">' + (o.agreed_at ? 'Открыть заказ / лист подбора' : 'Согласовать / лист подбора') + '</a>' +
+        '<a href="' + BASE + (o.agreed_at ? 'zakaz.html' : 'zayavka.html') + '#t=' + o.token + '" target="_blank" rel="noopener">Как видит клиент / PDF</a>' +
         (wa(o.phone) ? '<a href="https://wa.me/' + wa(o.phone) + '" target="_blank" rel="noopener">WhatsApp клиента</a>' : '') +
         '<select data-t="' + o.token + '" aria-label="Статус">' + Object.keys(ST).map(k => '<option value="' + k + '"' + (k === o.status ? ' selected' : '') + '>' + ST[k] + '</option>').join('') + '</select></div></div>';
     }).join('');

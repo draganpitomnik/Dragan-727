@@ -20,7 +20,7 @@
       .then(function (r) { if (!r.ok) throw r.status; return r.json(); })
       .then(function (d) {
         if (!d || !d.i) throw 0;
-        var o = {n: d.n, d: d.d, m: d.m, k: d.k, c: d.c, i: d.i};
+        var o = {n: d.n, d: d.d, m: d.m, k: d.k, c: d.c, i: d.i, ag: d.ag || null, st: d.st, src: d.src};
         var b = btoa(unescape(encodeURIComponent(JSON.stringify(o)))).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
         history.replaceState(null, "", location.pathname + "#o=" + b + "&t=" + t[1]); location.reload();
       })
@@ -74,6 +74,7 @@
   function vatNote() { return isOpt() ? VAT_OPT : VAT; }
   // v2: ссылка на страницу «Ваш заказ» — состав, скидки, итог (телефон клиента в ссылку не кладём)
   function clientLink() {
+    if (T) return new URL(CLIENT_PAGE, location.href).href + "#t=" + T;   // v2.2: заказ из базы — короткая ссылка
     var o = {n: D.n, d: fmtDate(), m: D.m || "", k: D.k || "retail", c: {fn: D.c.fn || "", ct: D.c.ct || ""}, cm: note(),
       i: L.filter(function (x) { return x.q > 0; }).map(function (x) { return [x.p, x.t, x.q, x.b, x.c, x.q0]; }),
       x: missing().filter(function (x) { return x.q === 0; }).map(function (x) { return x.p + " (" + x.t + ")"; })};
@@ -107,6 +108,13 @@
   }
   D.c = D.c || {};
   L = D.i.map(function (a) { var c = Math.round(+a[3]) || 0; return {p: String(a[0]), t: String(a[1]), q0: Math.max(0, parseInt(a[2], 10) || 0), q: Math.max(0, parseInt(a[2], 10) || 0), b: c, c: c}; });
+  // v2.2: заказ из базы — уже согласованный состав подставляем поверх заявки
+  var T = (location.hash.match(/[#&]t=([a-f0-9]{32})/) || [])[1] || "";
+  if (T && D.ag && D.ag.i) {
+    var AG = {}; D.ag.i.forEach(function (a) { AG[a[0] + "|" + a[1]] = a; });
+    L.forEach(function (x) { var a = AG[x.p + "|" + x.t]; if (a) { x.q = +a[2] || 0; x.c = Math.round(+a[4]) || 0; x.man = x.c !== x.b; } else x.q = 0; });
+    if (D.ag.cm) $("cm").value = D.ag.cm;
+  }
   $("on").textContent = "№" + D.n + " · " + (D.d || "") + " · " + (isOpt() ? "оптовый прайс" : "розничный прайс");
   if ($("optbox")) $("optbox").style.display = isOpt() ? "" : "none";
   $("fn").value = D.c.fn || ""; $("ct").value = D.c.ct || ""; $("ph").value = D.c.ph || "";
@@ -137,12 +145,14 @@
   if ($("cpc")) $("cpc").onclick = function () {
     if (!totals().n) { alert("Нет позиций."); return; }
     if (!okOpt()) { alert("Это оптовый прайс. Дополнительная скидка на опт — только с согласия Романа. Согласуйте и отметьте галочку «Согласовано с Романом»."); return; }
+    if (T && !saveAgreed()) return;
     clip(clientText(), "Текст подтверждения скопирован. Вставьте его в чат с клиентом (WhatsApp, Telegram, e-mail).");
   };
   $("wa").onclick = function (e) {
     var p = waPhone(D.c.ph);
     if (!totals().n || p.length < 11) { e.preventDefault(); alert(p.length < 11 ? "Проверьте номер телефона клиента." : "Нет позиций."); return; }
     if (!okOpt()) { e.preventDefault(); alert("Это оптовый прайс. Дополнительная скидка на опт — только с согласия Романа. Согласуйте и отметьте галочку «Согласовано с Романом»."); return; }
+    if (T && !saveAgreed()) { e.preventDefault(); return; }
     var t = clientText();
     this.href = "https://wa.me/" + p + "?text=" + encodeURIComponent(t);
   };
@@ -179,5 +189,35 @@
     if (!rows.length) { alert("Нет позиций к сборке."); return; }
     clip(rows.join("\n"), "Позиции скопированы (" + rows.length + "). Вставьте их на лист «Позиции» в столбец A первой пустой строки.");
   };
+  // v2.2: сохранение согласованного состава в базу (вход — сессия кабинета в этом браузере)
+  function session() {
+    try { var s = JSON.parse(localStorage.getItem("sb-abudsqoclurrtrtqlkvz-auth-token")); if (s && s.access_token && (!s.expires_at || s.expires_at * 1000 > Date.now() + 60000)) return s.access_token; } catch (e) {}
+    return "";
+  }
+  function saveAgreed(silent) {
+    if (!totals().n) { alert("Нет позиций."); return false; }
+    if (!okOpt()) { alert("Это оптовый прайс. Дополнительная скидка на опт — только с согласия Романа. Согласуйте и отметьте галочку «Согласовано с Романом»."); return false; }
+    var tk = session();
+    if (!tk) { alert("Вход в кабинет истёк. Откройте кабинет (войдите), потом вернитесь к этому заказу через «Заказы» — и нажмите ещё раз."); return false; }
+    var a = {d: fmtDate(), cm: note(), i: L.filter(function (x) { return x.q > 0; }).map(function (x) { return [x.p, x.t, x.q, x.b, Math.round(x.c), x.q0]; }),
+      x: missing().filter(function (x) { return x.q === 0; }).map(function (x) { return x.p + " (" + x.t + ")"; })};
+    regMsg("Сохраняю согласование в базе…");
+    fetch("https://abudsqoclurrtrtqlkvz.supabase.co/rest/v1/rpc/dg_order_save_agreed", {method: "POST", keepalive: true,
+      headers: {"apikey": "sb_publishable_KD9NLO5_HEtI_g6-Bv6anA_YyFDAbXA", "Authorization": "Bearer " + tk, "Content-Type": "application/json"},
+      body: JSON.stringify({t: T, a: a})})
+      .then(function (r) { if (!r.ok) throw r.status; return r.json(); })
+      .then(function (d) { regMsg("✓ Согласование сохранено в базе (" + f(d.tot) + " ₸). Статус: " + (d.st === "agreed" ? "согласована, ждёт оплаты" : d.st) + ".", "#2f6b3c"); if (!silent) {} })
+      .catch(function (e) { regMsg("✗ Не сохранилось в базе (" + e + "). Проверьте интернет и нажмите «Сохранить согласование».", "#a8322a"); alert("Согласование НЕ сохранилось в базе. Нажмите «Сохранить согласование» ещё раз."); });
+    return true;
+  }
+  function regMsg(t, c) { var e = $("dbm"); if (e) { e.textContent = t; e.style.color = c || "#6b7280"; } }
+  if (T) {
+    var g = $("rg1") && $("rg1").parentNode, hint = g && g.nextElementSibling;
+    if (g) g.outerHTML = '<div class="acts" style="margin-top:8px"><button type="button" class="btn ghost" id="sva">Сохранить согласование (без отправки клиенту)</button></div>';
+    if (hint && hint.tagName === "P") hint.textContent = "Заказ хранится в базе: в таблицу вносить не нужно. Статус (оплата, отправка) меняйте в кабинете → «Заказы». «Подтвердить клиенту» сам сохраняет согласование и ставит статус «Согласована».";
+    var m = document.createElement("p"); m.id = "dbm"; m.style.cssText = "font-size:14px;margin:8px 0 0;font-weight:600"; $("sva").parentNode.after(m);
+    $("sva").onclick = function () { saveAgreed(); };
+    if (D.ag) regMsg("Этот заказ уже согласован (" + (D.ag.d || "") + "). Если что-то поменяли — сохраните заново или подтвердите клиенту ещё раз.", "#2f6b3c");
+  }
   render();
 })();

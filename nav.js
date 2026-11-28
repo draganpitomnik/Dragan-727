@@ -40,7 +40,8 @@
     'z-pi1s0iv4ao-v2.html': { key: 'orders', title: 'Обработка заявки' },
     'z-pi1s0iv4ao-v3.html': { key: 'orders', title: 'Обработка заявки' },
     'zayavka.html': { key: 'orders', title: 'Заявка клиента' },
-    'orders.html': { key: 'orders', title: 'Заявки с прайса' }
+    'orders.html': { key: 'orders', title: 'Заказы' },
+    'order-new.html': { key: 'orders', title: 'Новый заказ' }
   };
   var page = PAGES[file];
   if (!page) return;
@@ -118,7 +119,7 @@
   var nodes = [nav];
   if (!isHome) {
     var items = [
-      ['home', '⌂ Кабинет'], ['price', 'Прайс'], ['kp', 'КП'], ['contracts', 'Договоры'], ['orders', 'Заявки'],
+      ['home', '⌂ Кабинет'], ['price', 'Прайс'], ['kp', 'КП'], ['contracts', 'Договоры'], ['orders', 'Заказы'],
       ['delivery', 'Адрес и доставка'], ['requisites', 'Реквизиты'], ['messages', 'Шаблоны'], ['knowledge', 'База знаний'], ['gifts', 'Советы клиенту']
     ];
     var chips = document.createElement('div');

@@ -38,8 +38,24 @@
   var $ = function (i) { return document.getElementById(i); };
   var f = function (n) { return Math.round(n).toLocaleString("ru-RU"); };
   var esc = function (s) { return String(s).replace(/[&<>"]/g, function (c) { return {"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;"}[c]; }); };
+  // v1.1 (28.11.2026): короткая ссылка #t=… — согласованный заказ из базы
+  var tm = location.hash.match(/[#&]t=([a-f0-9]{32})/);
+  if (tm) {
+    $("ord").innerHTML = '<div style="padding:30px 16px;color:#6b7280">Загружаю заказ…</div>';
+    fetch("https://abudsqoclurrtrtqlkvz.supabase.co/rest/v1/rpc/dg_order_get", {method: "POST", headers: {"apikey": "sb_publishable_KD9NLO5_HEtI_g6-Bv6anA_YyFDAbXA", "Content-Type": "application/json"}, body: JSON.stringify({t: tm[1]})})
+      .then(function (r) { if (!r.ok) throw r.status; return r.json(); })
+      .then(function (d) {
+        if (!d) throw 0;
+        if (!d.ag || !d.ag.i) { $("main").innerHTML = '<div class="empty" style="padding:40px 0">Заказ ещё не согласован менеджером. Как только согласуют — здесь появится состав и итог.</div>'; return; }
+        show({n: d.n, d: d.ag.d, m: d.m, k: d.k, c: d.c, i: d.ag.i, x: d.ag.x, cm: d.ag.cm});
+      })
+      .catch(function () { $("main").innerHTML = '<div class="empty" style="padding:40px 0">Не удалось загрузить заказ — проверьте интернет и обновите страницу.</div>'; });
+    return;
+  }
   var D = null, m = location.hash.match(/[#&]o=([^&]+)/);
   if (m) try { var b = m[1].replace(/-/g, "+").replace(/_/g, "/"); while (b.length % 4) b += "="; D = JSON.parse(decodeURIComponent(escape(atob(b)))); } catch (e) { D = null; }
+  show(D);
+  function show(D) {
   if (!D || !D.i || !D.i.length) { $("main").innerHTML = '<div class="empty" style="padding:40px 0">Заказ не найден: ссылка повреждена или обрезана. Попросите менеджера прислать её ещё раз.</div>'; return; }
   var ph = MGRS[D.m] || "";
   $("mn").textContent = D.m || "питомник Dragan";
@@ -64,6 +80,7 @@
   var wa = ph ? "https://wa.me/" + ph + "?text=" + encodeURIComponent("Здравствуйте! По заказу №" + D.n + ": ") : "";
   if (wa) $("wa").href = wa; else $("wa").style.display = "none";
   $("pdf").onclick = function () { window.print(); };
+  }
 })();
 </script>
 </body></html>
