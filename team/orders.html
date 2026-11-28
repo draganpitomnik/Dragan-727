@@ -13,7 +13,7 @@ body{margin:0;background:var(--cream);color:var(--navy);font:15px/1.5 system-ui,
 .tag.opt{background:var(--navy);color:var(--gold)}.acts{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
 .acts a,.acts select{min-height:40px;display:inline-flex;align-items:center;border-radius:10px;border:1px solid var(--line);padding:0 12px;color:var(--navy);text-decoration:none;font:600 14px system-ui;background:#fff}
 .acts a.main{background:var(--navy);color:#fff;border-color:var(--navy)}.empty{padding:30px 4px;color:var(--muted)}.err{color:#a8322a}
-</style></head><body><main>
+</style><script src="../nav.js" defer></script></head><body><main>
 <section class="hero"><div class="eyebrow">DRAGAN MANAGER</div><h1>Заявки с прайса</h1><p>Всё, что клиенты отправили с прайсов. Заявка ≠ оплата: наличие и цену согласуйте, потом подтверждайте клиенту. <a href="index.html">← в кабинет</a></p></section>
 <div class="bar" id="bar"><button data-f="new" aria-pressed="true">Новые</button><button data-f="in_work" aria-pressed="false">В работе</button><button data-f="" aria-pressed="false">Все</button><select id="who" aria-label="Менеджер"><option value="">Все менеджеры</option><option>Наталья</option><option>Василина</option></select><button id="rl" aria-pressed="false">↻ Обновить</button></div>
 <div id="list"><div class="empty">Загрузка…</div></div>

@@ -31,7 +31,16 @@
     'v-azsei6mqr7.html': { key: 'price', title: 'Прайс', m: 'v', ownSticky: true },
     'kn-ufmo9qwfep.html': { key: 'kp', title: 'КП', m: 'n' },
     'kv-0x7qiymt36.html': { key: 'kp', title: 'КП', m: 'v' },
-    'z-pi1s0iv4ao.html': { key: 'orders', title: 'Заявка' }
+    'z-pi1s0iv4ao.html': { key: 'orders', title: 'Заявка' },
+    // 28.11.2026: оптовые прайсы, v2-версии, обработка заявки, заявка из базы, список заявок
+    'n-cf56mb93ut-opt.html': { key: 'price', title: 'Оптовый прайс', m: 'n', ownSticky: true },
+    'v-azsei6mqr7-opt.html': { key: 'price', title: 'Оптовый прайс', m: 'v', ownSticky: true },
+    'n-cf56mb93ut-v2.html': { key: 'price', title: 'Прайс', m: 'n', ownSticky: true },
+    'v-azsei6mqr7-v2.html': { key: 'price', title: 'Прайс', m: 'v', ownSticky: true },
+    'z-pi1s0iv4ao-v2.html': { key: 'orders', title: 'Обработка заявки' },
+    'z-pi1s0iv4ao-v3.html': { key: 'orders', title: 'Обработка заявки' },
+    'zayavka.html': { key: 'orders', title: 'Заявка клиента' },
+    'orders.html': { key: 'orders', title: 'Заявки с прайса' }
   };
   var page = PAGES[file];
   if (!page) return;
@@ -43,7 +52,7 @@
 
   function href(k) {
     if (k === 'contracts') return ROOT + 'team/contracts.html';
-    if (k === 'orders') return ROOT + 'z-pi1s0iv4ao.html';
+    if (k === 'orders') return ROOT + 'team/orders.html';
     if (k === 'price' || k === 'kp') return m ? ROOT + ROUTES[m][k] : CAB;
     return CAB + '#' + k;
   }
